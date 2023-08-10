@@ -53,6 +53,27 @@ def fetch_reader_document_list_api(
     return full_data
 
 
+def add_document(data: dict) -> None:
+    response = requests.post(
+        url="https://readwise.io/api/v3/save/",
+        headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
+        json=data,
+    )
+
+    if response.status_code == 201:
+        print("Document added successfully!")
+    elif response.status_code == 200:
+        print("Document already exist.")
+    elif response.status_code == 401:
+        print("Failed to add document. Please provide a valid API key.")
+    elif response.status_code == 500:
+        print("An error occurred while adding the document. Please try again later.")
+    else:
+        print(f"Unexpected response: {response.status_code}")
+
+    return response
+
+
 if __name__ == "__main__":
     """List Documents from Reader API"""
     # Get all of a user's documents from all time
