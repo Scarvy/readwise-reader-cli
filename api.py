@@ -7,6 +7,8 @@ import requests
 import urllib3
 import dotenv
 
+from document import DocumentInfo
+
 urllib3.disable_warnings()
 dotenv.load_dotenv()
 
@@ -75,7 +77,7 @@ def add_document(data: dict) -> None:
 
 
 if __name__ == "__main__":
-    """List Documents from Reader API"""
+    """List Documents"""
     # Get all of a user's documents from all time
     all_data = fetch_reader_document_list_api()
 
@@ -87,3 +89,30 @@ if __name__ == "__main__":
         days=1
     )  # use your own stored date
     new_data = fetch_reader_document_list_api(docs_after_date.isoformat())
+
+    """Save new Documents"""
+    # DocumentInfo class
+    document_one = DocumentInfo(
+        url="https://example.com",
+        html="<p>This is the content</p>",
+        title="Sample Document",
+        tags=["tag1", "tag2"],
+    )
+
+    # as a dictionary
+    document_one_dict = document_one.to_dict()
+    print(document_one_dict)
+
+    # as json
+    document_one_json = document_one.to_json()
+    print(document_one_json)
+
+    # from dictionary
+    document_two_dict = {
+        "url": "https://realpython.com/python-coding-setup-windows/",
+        "title": "Python Coding Setup on Windows",
+    }
+    document_two = DocumentInfo(**document_two_dict)
+    print(document_two.to_dict())
+
+    response = add_document(document_one_dict)
