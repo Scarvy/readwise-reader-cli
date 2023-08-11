@@ -1,18 +1,56 @@
-import datetime as dt
+import json
+from collections import namedtuple
+from datetime import datetime
+from typing import List
 
-from pandas import DataFrame
 from bs4 import BeautifulSoup
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-with open("ReadingList.html", "r") as file:
-    html_content = file.read()
+Bookmark = namedtuple("Bookmark", "title url add_date")
 
-soup = BeautifulSoup(html_content, "html.parser")
 
-reading_list_contents = [
-    {"title": link.text, "url": link.get("href")} for link in soup.find_all("a")
-]
+def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
+    timestamp_seconds = (
+        timestamp_microseconds / 1_000_000
+    )  # Convert microseconds to seconds
 
-reading_list = DataFrame.from_dict(reading_list_contents)
-reading_list.to_csv("reading_list.csv")
+    datetime_obj = datetime.utcfromtimestamp(timestamp_seconds)
+
+    return datetime_obj.strftime(DATETIME_FORMAT)
+
+
+def build_chrome_reading_list(file_path: str) -> List[Bookmark]:
+    if file_path.endswith(".html"):
+        with open(file_path, "r") as file:
+            html_content = file.read()
+
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    chrome_reading_list = [
+        Bookmark(
+            link.text,
+            link.get("href"),
+            utcfromtimestamp_in_microseconds(float(link.get("add_date"))),
+        )
+        for link in soup.find_all("a")
+    ]
+
+    return chrome_reading_list
+
+
+def to_json(data: List[Bookmark]) -> None:
+    with open("chrome_reading_list.json", "w") as f:
+        json.dump(data, f, indent=4)
+
+
+def reading_list_to_json(file_path: str) -> None:
+    chrome_reading_list = build_chrome_reading_list(file_path=file_path)
+
+    to_json(chrome_reading_list)
+
+
+if __name__ == "__main__":
+    file_path = "ReadingList.html"
+
+    reading_list_to_json(file_path=file_path)
