@@ -60,7 +60,7 @@ def get_reading_list() -> List[DocumentInfo]:
         chrome_reading_list = json.load(f)
         for bookmark in chrome_reading_list:
             url = bookmark[1]  # bookmark url
-            document_list.append(DocumentInfo(url))
+            document_list.append(DocumentInfo(url, tags=["chrome-reading-list"]))
     return document_list
 
 
