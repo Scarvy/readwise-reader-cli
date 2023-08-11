@@ -2,8 +2,11 @@ import json
 from collections import namedtuple
 from datetime import datetime
 from typing import List
+from pathlib import Path
 
 from bs4 import BeautifulSoup
+
+from document import DocumentInfo
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -50,7 +53,20 @@ def reading_list_to_json(file_path: str) -> None:
     to_json(chrome_reading_list)
 
 
+def get_reading_list() -> List[DocumentInfo]:
+    document_list = []
+
+    with open("chrome_reading_list.json", "r") as f:
+        chrome_reading_list = json.load(f)
+        for bookmark in chrome_reading_list:
+            url = bookmark[1]  # bookmark url
+            document_list.append(DocumentInfo(url))
+    return document_list
+
+
 if __name__ == "__main__":
     file_path = "ReadingList.html"
 
     reading_list_to_json(file_path=file_path)
+
+    chrome_reading_list = get_reading_list()
