@@ -1,5 +1,5 @@
 """Functions for handling bookmarks, loading and saving reading lists, and managing HTML files."""
-from json import JSONEncoder, dumps, loads
+from json import dumps, loads
 from collections import namedtuple
 from datetime import datetime
 from typing import List
