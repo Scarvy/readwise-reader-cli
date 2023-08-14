@@ -1,20 +1,10 @@
+"""A dataclass for storing Document information"""
 from json import dumps
 from dataclasses import dataclass
 from typing import List, Optional
 from httpx import URL
 
-VALID_LOCATION_OPTIONS = {"new", "later", "archive", "feed"}
-VALID_CATEGORY_OPTIONS = {
-    "article",
-    "email",
-    "rss",
-    "highlight",
-    "note",
-    "pdf",
-    "epub",
-    "tweet",
-    "video",
-}
+from constants import VALID_LOCATION_OPTIONS, VALID_CATEGORY_OPTIONS
 
 # TODO ISSUE add notes property. Won't take empty string "" or None as an argument.
 

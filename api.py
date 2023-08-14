@@ -1,3 +1,4 @@
+"""Provides code to fetch and manage document information."""
 import os
 import time
 from typing import List
@@ -16,6 +17,15 @@ dotenv.load_dotenv()
 def fetch_reader_document_list_api(
     updated_after=None, location=None
 ) -> List[dict] | List:
+    """Fetches documents from the Readwise Reader API.
+
+    Args:
+        updated_after (str, optional): The date after which to fetch updated documents.
+        location (str, optional): The location to filter documents by.
+
+    Returns:
+        List[dict] | List: A list of dictionaries containing document information.
+    """
     full_data = []
     next_page_cursor = None
     while True:
@@ -56,6 +66,11 @@ def fetch_reader_document_list_api(
 
 
 def add_document(data: dict) -> None:
+    """Adds a document to Readwise using the Reader API.
+
+    Args:
+        data (dict): The data of the document to be added.
+    """
     response = requests.post(
         url="https://readwise.io/api/v3/save/",
         headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},

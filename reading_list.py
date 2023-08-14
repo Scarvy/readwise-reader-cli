@@ -1,3 +1,4 @@
+"""Functions for handling bookmarks, loading and saving reading lists, and managing HTML files."""
 from json import JSONEncoder, dumps, loads
 from collections import namedtuple
 from datetime import datetime
@@ -10,15 +11,26 @@ from bs4 import BeautifulSoup
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 CHROME_DEFAULT_FILENAME = "ReadingList"
 
+# A named tuple to represent bookmarks with title, URL, and add_date
 Bookmark = namedtuple("Bookmark", "title url add_date")
 
 
 class BookmarkEncoder(JSONEncoder):
+    """JSONEncoder subclass to handle encoding of Bookmark objects."""
+
     def default(self, o: object) -> Any:
         return str(o) if isinstance(o, Path) else o
 
 
 def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
+    """Converts a timestamp in microseconds to a UTC datetime object.
+
+    Args:
+        timestamp_microseconds (float): The timestamp in microseconds.
+
+    Returns:
+        datetime: A UTC datetime object.
+    """
     timestamp_seconds = (
         timestamp_microseconds / 1_000_000
     )  # Convert microseconds to seconds
@@ -29,6 +41,11 @@ def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
 
 
 def data_directory() -> Path:
+    """Returns the data directory for storing reading lists.
+
+    Returns:
+        Path: The path to the data directory.
+    """
     (target_directory := xdg_data_home() / "reader" / "reading_lists").mkdir(
         parents=True, exist_ok=True
     )
@@ -36,10 +53,23 @@ def data_directory() -> Path:
 
 
 def reading_list_file() -> Path:
+    """Returns the path to the reading list JSON file.
+
+    Returns:
+        Path: The path to the reading list JSON file.
+    """
     return data_directory() / "chrome.json"
 
 
 def save_reading_list(reading_list: list[Bookmark]) -> None:
+    """Loads the reading list from a JSON file or builds it from an HTML file.
+
+    Args:
+        file_path (str, optional): The path to the HTML file. Defaults to None.
+
+    Returns:
+        List[Bookmark]: The loaded list of bookmarks.
+    """
     reading_list_file().write_text(
         dumps(reading_list, indent=4, sort_keys=True, cls=BookmarkEncoder)
     )
@@ -57,6 +87,14 @@ def load_reading_list(file_path: str = None) -> List[Bookmark]:
 
 
 def build_html_path(file_path: str = None) -> Path:
+    """Builds the path to an HTML file, either using a custom file_path or the default.
+
+    Args:
+        file_path (str, optional): The path to the HTML file. Defaults to None.
+
+    Returns:
+        Path: The path to the HTML file.
+    """
     default_folder = Path.home() / "Downloads"
 
     if file_path:
@@ -72,6 +110,11 @@ def build_html_path(file_path: str = None) -> Path:
 
 
 def build_reading_list(file_path: str = None) -> None:
+    """Builds the reading list from an HTML file and saves it as JSON.
+
+    Args:
+        file_path (str, optional): The path to the HTML file. Defaults to None.
+    """
     file_path = build_html_path(file_path)
 
     with open(file_path, "r", encoding="utf-8") as f:
