@@ -2,3 +2,4 @@ beautifulsoup4==4.12.2
 python-dotenv==1.0.0
 requests==2.31.0
 xdg-base-dirs==6.0.0
+httpx==0.24.1
