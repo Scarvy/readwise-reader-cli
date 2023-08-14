@@ -2,7 +2,7 @@
 from json import JSONEncoder, dumps, loads
 from collections import namedtuple
 from datetime import datetime
-from typing import Any, List
+from typing import List
 from pathlib import Path
 
 from xdg_base_dirs import xdg_data_home
@@ -13,13 +13,6 @@ CHROME_DEFAULT_FILENAME = "ReadingList"
 
 # A named tuple to represent bookmarks with title, URL, and add_date
 Bookmark = namedtuple("Bookmark", "title url add_date")
-
-
-class BookmarkEncoder(JSONEncoder):
-    """JSONEncoder subclass to handle encoding of Bookmark objects."""
-
-    def default(self, o: object) -> Any:
-        return str(o) if isinstance(o, Path) else o
 
 
 def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
@@ -70,15 +63,13 @@ def save_reading_list(reading_list: list[Bookmark]) -> None:
     Returns:
         List[Bookmark]: The loaded list of bookmarks.
     """
-    reading_list_file().write_text(
-        dumps(reading_list, indent=4, sort_keys=True, cls=BookmarkEncoder)
-    )
+    reading_list_file().write_text(dumps(reading_list, indent=4, sort_keys=True))
 
 
 def load_reading_list(file_path: str = None) -> List[Bookmark]:
     return (
         [
-            Bookmark(title, Path(location), add_date)
+            Bookmark(title, location, add_date)
             for (title, location, add_date) in loads(reading_list.read_text())
         ]
         if (reading_list := reading_list_file()).exists()
@@ -141,8 +132,5 @@ if __name__ == "__main__":
     file_path = "CustomReadingList"
     file_path = "/Users/scott_carvalho/projects/reader-import/ReadingList.html"
 
-    html_path = build_html_path(file_path)
-    print("HTML Path:", html_path)
-
     # load reading list
-    reading_list = load_reading_list(html_path)
+    reading_list = load_reading_list(file_path)
