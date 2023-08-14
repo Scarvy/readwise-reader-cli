@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from httpx import URL
 
-from constants import VALID_LOCATION_OPTIONS, VALID_CATEGORY_OPTIONS
+from .constants import VALID_LOCATION_OPTIONS, VALID_CATEGORY_OPTIONS
 
 # TODO ISSUE add notes property. Won't take empty string "" or None as an argument.
 

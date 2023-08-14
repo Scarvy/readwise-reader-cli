@@ -8,7 +8,7 @@ import requests
 import urllib3
 import dotenv
 
-from document import DocumentInfo
+from .document import DocumentInfo
 
 urllib3.disable_warnings()
 dotenv.load_dotenv()
