@@ -48,7 +48,7 @@ To import your Chrome Reading List, you first need to download your data from yo
 
 
 ```bash
-python -m readerclii mport -f ReadingList
+python -m readercli import -f ReadingList
 python -m readercli import -f /path/to/CustomReadingList
 ```
 
