@@ -1,9 +1,9 @@
 """Provides code to interact with the Reader API in the command-line"""
 import argparse
 
-from readercli.api import fetch_reader_document_list_api, add_document
-from readercli.reading_list import load_reading_list
-from readercli.constants import VALID_LOCATION_OPTIONS
+from .api import fetch_documents, add_document
+from .reading_list import load_reading_list
+from .constants import VALID_LOCATION_OPTIONS
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
     if args.command == "list":
         if args.location in VALID_LOCATION_OPTIONS:
             print(f"Fetching Document list from: {args.location}")
-            full_data = fetch_reader_document_list_api(location=args.location)
+            full_data = fetch_documents(location=args.location)
             print(full_data)
         else:
             print(f"`{args.location}` is not a valid location for Documents.")
