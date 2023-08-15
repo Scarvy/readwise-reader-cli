@@ -14,9 +14,7 @@ urllib3.disable_warnings()
 dotenv.load_dotenv()
 
 
-def fetch_reader_document_list_api(
-    updated_after=None, location=None
-) -> List[dict] | List:
+def fetch_documents(updated_after=None, location=None) -> List[dict] | List:
     """Fetches documents from the Readwise Reader API.
 
     Args:
@@ -94,16 +92,16 @@ def add_document(data: dict) -> None:
 if __name__ == "__main__":
     """List Documents"""
     # Get all of a user's documents from all time
-    all_data = fetch_reader_document_list_api()
+    all_data = fetch_documents()
 
     # Get all of a user's archived documents
-    archived_data = fetch_reader_document_list_api(location="archive")
+    archived_data = fetch_documents(location="archive")
 
     # Later, if you want to get new documents updated after some date, do this:
     docs_after_date = datetime.datetime.now() - datetime.timedelta(
         days=1
     )  # use your own stored date
-    new_data = fetch_reader_document_list_api(docs_after_date.isoformat())
+    new_data = fetch_documents(docs_after_date.isoformat())
 
     """Save new Documents"""
     # DocumentInfo class
