@@ -1,7 +1,7 @@
 """Provides code to fetch and manage document information."""
 import os
 import time
-from typing import List
+from typing import List, Optional, Union
 
 import datetime
 import requests
@@ -14,11 +14,20 @@ urllib3.disable_warnings()
 dotenv.load_dotenv()
 
 
-def fetch_documents(updated_after=None, location=None) -> List[dict] | List:
+def _convert_after_days(days: int = None) -> str:
+    return (
+        datetime.datetime.now()
+        - datetime.timedelta(days=((days := days) if days else 1))
+    ).isoformat()
+
+
+def fetch_documents(
+    updated_after: Optional[Union[str, int]] = None, location: str = None
+) -> List[dict] | List:
     """Fetches documents from the Readwise Reader API.
 
     Args:
-        updated_after (str, optional): The date after which to fetch updated documents.
+        updated_after (str, int, optional): The date after which to fetch updated documents or N number of days.
         location (str, optional): The location to filter documents by.
 
     Returns:
@@ -31,6 +40,8 @@ def fetch_documents(updated_after=None, location=None) -> List[dict] | List:
         if next_page_cursor:
             params["pageCursor"] = next_page_cursor
         if updated_after:
+            if isinstance(updated_after, int):
+                updated_after = _convert_after_days(updated_after)
             params["updatedAfter"] = updated_after
         if location:
             params["location"] = location
@@ -94,14 +105,12 @@ if __name__ == "__main__":
     # Get all of a user's documents from all time
     all_data = fetch_documents()
 
-    # Get all of a user's archived documents
+    # # Get all of a user's archived documents
     archived_data = fetch_documents(location="archive")
 
-    # Later, if you want to get new documents updated after some date, do this:
-    docs_after_date = datetime.datetime.now() - datetime.timedelta(
-        days=1
-    )  # use your own stored date
-    new_data = fetch_documents(docs_after_date.isoformat())
+    # Later, if you want to get new documents updated after some date in days, do this:
+    days = 1  # updated after N days
+    new_data = fetch_documents(updated_after=days, location="later")
 
     """Save new Documents"""
     # DocumentInfo class

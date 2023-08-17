@@ -1,9 +1,19 @@
 """Provides code to interact with the Reader API in the command-line"""
 import argparse
 
+from rich import print
+
 from .api import fetch_documents, add_document
 from .reading_list import load_reading_list
 from .constants import VALID_LOCATION_OPTIONS
+
+# Use a dictionary for location options and descriptions
+LOCATION_DESCRIPTIONS = {
+    "new": "New Documents",
+    "later": "Later Documents",
+    "archive": "Archived Documents",
+    "feed": "Feed Documents",
+}
 
 
 def main():
@@ -13,9 +23,14 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=False)
 
     list_parser = subparsers.add_parser("list", help="List Documents")
+    list_parser.add_argument("-d", "--days", help="Updated after in days.")
     list_parser.add_argument(
-        "-l", "--location", help="Document location: `new`, `later`, `archive`, `feed`"
+        "-l",
+        "--location",
+        choices=VALID_LOCATION_OPTIONS,
+        help="Document location: `new`, `later`, `archive`, `feed`",
     )
+
     import_parser = subparsers.add_parser("import", help="Import Chrome Reading List")
     import_parser.add_argument("-f", "--file", help="File path or name for HTML file")
 
@@ -26,31 +41,41 @@ def main():
     args = parser.parse_args()
 
     if args.command == "list":
-        if args.location in VALID_LOCATION_OPTIONS:
-            print(f"Fetching Document list from: {args.location}")
-            full_data = fetch_documents(location=args.location)
+        if args.location:
+            full_data = fetch_documents(
+                updated_after=int(args.days), location=args.location
+            )
             print(full_data)
         else:
-            print(f"`{args.location}` is not a valid location for Documents.")
-            print("Try: `new`, `later`, `archive`, `feed`")
+            print(
+                f"{LOCATION_DESCRIPTIONS[args.location]} is not a valid location for Documents."
+            )
+            print("Try:", ", ".join(LOCATION_DESCRIPTIONS.keys()))
 
     elif args.command == "import":
         print("Importing Reading List...")
         reading_list = load_reading_list(args.file)
         print(reading_list)
+
     elif args.command == "add":
         if args.file:
             print(f"Adding Document(s) from file: {args.file}")
             reading_list = load_reading_list(args.file)
-            for document in reading_list:
-                add_document(data={"url": document.url})
+            documents_to_add = [{"url": document.url} for document in reading_list]
+            add_document_batch(documents_to_add)
         elif args.url:
             print(f"Adding Document from URL: {args.url}")
             add_document(data={"url": args.url})
         else:
             print("No file or URL specified.")
+
     else:
         parser.print_help()
+
+
+def add_document_batch(documents: list[dict]) -> None:
+    for document in documents:
+        add_document(data={"url": document.url})
 
 
 if __name__ == "__main__":
