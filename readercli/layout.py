@@ -27,7 +27,9 @@ def table_layout(documents):
     table.add_column("Location", justify="right")
 
     for document in documents:
-        if document["category"] == "highlight" or document["category"] == "note":
+        if (
+            document["category"] == "highlight" or document["category"] == "note"
+        ):  # skip highlights and notes
             continue
         author = (
             Text(document["author"], style="cyan")
