@@ -8,6 +8,11 @@ from rich.text import Text
 console = Console()
 
 
+def reading_progress_format(reading_progress: float) -> str:
+    percentage_str = f"{round(reading_progress * 100, 2)}%"
+    return percentage_str
+
+
 def table_layout(documents):
     """Displays documents in a table format using rich"""
 
@@ -16,14 +21,23 @@ def table_layout(documents):
     # make the columns
     table.add_column("Title", style="bold yellow")
     table.add_column("Author")
+    table.add_column("Category")
     table.add_column("Summary")
+    table.add_column("Reading Progress")
     table.add_column("Location", justify="right")
 
     for document in documents:
+        if document["category"] == "highlight" or document["category"] == "note":
+            continue
         author = (
             Text(document["author"], style="cyan")
             if document["author"]
             else Text("no author", style="italic")
+        )
+        category = (
+            Text(document["category"], style="cyan")
+            if document["category"]
+            else Text("no category", style="italic")
         )
         summary = (
             Text(document["summary"])
@@ -31,12 +45,22 @@ def table_layout(documents):
             else Text("no summary", style="italic")
         )
 
-        name = Text(document["title"], overflow="fold")
-        name.stylize(f"yellow link {document['url']}")
+        reading_progress = (
+            Text(reading_progress_format(document["reading_progress"]))
+            if document["reading_progress"]
+            else Text("no reading progress", style="italic")
+        )
+
+        title = (
+            Text(document["title"])
+            if document["title"]
+            else Text("no title", style="italic")
+        )
+        title.stylize(f"yellow link {document['url']}")
 
         location = Text(document["location"], style="blue")
 
-        table.add_row(name, author, summary, location)
+        table.add_row(title, author, category, summary, reading_progress, location)
 
     console.print(table)
 
@@ -218,6 +242,28 @@ if __name__ == "__main__":
             "notes": "",
             "parent_id": None,
             "reading_progress": 0.6842105263157895,
+        },
+        {
+            "id": "01h8ajwcytqbhv627ag9cg2a01",
+            "url": "https://read.readwise.io/read/01h8ajwcytqbhv627ag9cg2a01",
+            "title": None,
+            "author": None,
+            "source": None,
+            "category": "highlight",
+            "location": "later",
+            "tags": None,
+            "site_name": None,
+            "word_count": 0,
+            "created_at": "2023-08-20T23:01:04.928012+00:00",
+            "updated_at": "2023-08-20T23:01:04.928026+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "Almost two-thirds of respondents said their APIs generate revenue. Of those respondents, 43% said APIs generate over a quarter of company revenue. In the financial services and advertising, API revenue was closely measured. It was judged the second-most important metric of public API success, just after usage.",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h8ajqppjyrwfa8gvw1gg3x8a",
+            "reading_progress": 0,
         },
     ]
 
