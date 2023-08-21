@@ -6,6 +6,7 @@ from rich import print
 from .api import fetch_documents, add_document
 from .reading_list import load_reading_list
 from .constants import VALID_LOCATION_OPTIONS
+from .utils import count_category_values
 
 # Use a dictionary for location options and descriptions
 LOCATION_DESCRIPTIONS = {
@@ -41,16 +42,27 @@ def main():
     args = parser.parse_args()
 
     if args.command == "list":
-        if args.location:
-            full_data = fetch_documents(
-                updated_after=int(args.days), location=args.location
-            )
+        try:
+            if args.location or args.days:
+                if args.days:
+                    try:
+                        days = int(args.days)
+                    except ValueError as e:
+                        print("Error: ", e)
+                        days = None  # switch to None if user inputs a incorrect value that's not an int
+                else:
+                    days = args.days
+                full_data = fetch_documents(location=args.location, updated_after=days)
+            else:
+                full_data = fetch_documents()
             print(full_data)
-        else:
-            print(
-                f"{LOCATION_DESCRIPTIONS[args.location]} is not a valid location for Documents."
-            )
-            print("Try:", ", ".join(LOCATION_DESCRIPTIONS.keys()))
+            print("Number of documents:", len(full_data))
+            print("Category breakdown:", count_category_values(full_data))
+        except ValueError as e:
+            print("Error:", e)
+            if args.location not in VALID_LOCATION_OPTIONS:
+                print(f"'{args.location}' is not a valid location for Documents.")
+                print("Try:", ", ".join(LOCATION_DESCRIPTIONS.keys()))
 
     elif args.command == "import":
         print("Importing Reading List...")
