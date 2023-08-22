@@ -17,32 +17,41 @@ CACHED_RESULT_PATH = CACHE_DIR / "library.json"
 CACHE_EXPIRATION = 1  # Minutes
 
 
-@click.command()
+@click.group(help="Interact with your Reader Library")
+def cli():
+    pass
+
+
+@cli.command(help="List Documents")
 @click.option(
     "--location",
     "-l",
     default="archive",
     show_default=True,
     type=click.Choice(VALID_LOCATION_OPTIONS, case_sensitive=False),
-    help="Document(s) location: `new`, `later`, `archive`, `feed`",
-)
-@click.option(
-    "--days",
-    "-d",
-    default=1,
-    show_default=True,
-    help="Updated after in days.",
+    help="Document(s) location",
 )
 @click.option(
     "--category",
     "-c",
     type=click.Choice(VALID_CATEGORY_OPTIONS, case_sensitive=False),
-    help="Document(s) category: `article`, `email`, `rss`, `highlight`, `note`, `pdf`, `epub`, `tweet`, `video`",
+    help="Document(s) category",
 )
-def cli(location, category, days):
-    options_key = (
-        f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{days}"
-    )
+@click.option(
+    "--update-after",
+    "-a",
+    default=1,
+    show_default=True,
+    help="Updated after in number of days.",
+)
+@click.option(  # Don't hit Reader API
+    "--no-api",
+    is_flag=True,
+    default=False,
+    hidden=True,
+)
+def list(location, category, update_after, no_api=False):
+    options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after}"
     click.echo(options_key)
 
     tmp_docs = None
@@ -60,8 +69,11 @@ def cli(location, category, days):
                     tmp_docs = result
 
     if not tmp_docs:  # If cache expired or results not yet cached
+        if no_api:
+            return
+
         tmp_docs = fetch_documents(
-            updated_after=days, location=location, category=category
+            updated_after=update_after, location=location, category=category
         )
 
         if len(tmp_docs) == 0:  # if list of documents is empty
@@ -84,7 +96,19 @@ def cli(location, category, days):
 
     docs = tmp_docs
 
-    table_layout(docs[:-1])
+    table_layout(docs[:-1])  # Slice off the time key before passing to layout
+
+
+@cli.command(help="Add Document")
+@click.option("--url", "-u", help="Add Document using URL")
+def add(url):
+    click.echo(url)
+
+
+@cli.command(help="Upload Reading List File")
+@click.argument("filename", type=click.Path(exists=True))
+def upload(filename):
+    click.echo(filename)
 
 
 if __name__ == "__main__":
