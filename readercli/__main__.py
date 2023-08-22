@@ -1,11 +1,20 @@
 """The main CLI module of readercli"""
+import os
+import json
+from datetime import datetime, timedelta
+
 import click
+from xdg_base_dirs import xdg_data_home
 
 from .api import fetch_documents
 from .layout import table_layout
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 
 DEFAULT_CATEGORY_NAME = "all"
+
+CACHE_DIR = xdg_data_home() / "reader"
+CACHED_RESULT_PATH = CACHE_DIR / "library.json"
+CACHE_EXPIRATION = 1  # Minutes
 
 
 @click.command()
@@ -31,13 +40,51 @@ DEFAULT_CATEGORY_NAME = "all"
     help="Document(s) category: `article`, `email`, `rss`, `highlight`, `note`, `pdf`, `epub`, `tweet`, `video`",
 )
 def cli(location, category, days):
-    option_key = f"{location}_{(category := category if category else DEFAULT_CATEGORY_NAME)}_{days}"
-    click.echo(option_key)
-
-    full_data = fetch_documents(
-        updated_after=days, location=location, category=category
+    options_key = (
+        f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{days}"
     )
-    table_layout(full_data)
+    click.echo(options_key)
+
+    tmp_docs = None
+
+    if os.path.exists(CACHED_RESULT_PATH):
+        with open(CACHED_RESULT_PATH, "r") as f:
+            json_file = json.load(f)
+            result = json_file.get(options_key)
+            if result:
+                t = result[-1].get("time")
+                time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
+                diff = datetime.now() - time
+                if diff < timedelta(minutes=CACHE_EXPIRATION):
+                    print("Using cache instead!")
+                    tmp_docs = result
+
+    if not tmp_docs:  # If cache expired or results not yet cached
+        tmp_docs = fetch_documents(
+            updated_after=days, location=location, category=category
+        )
+
+        if len(tmp_docs) == 0:  # if list of documents is empty
+            return
+
+        else:  # Cache documents
+            tmp_docs.append({"time": str(datetime.now())})
+            os.makedirs(CACHE_DIR, exist_ok=True)
+
+            with open(CACHED_RESULT_PATH, "a+") as f:
+                if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
+                    result_dict = {options_key: tmp_docs}
+                    f.write(json.dumps(result_dict, indent=4))
+                else:
+                    f.seek(0)
+                    result_dict = json.load(f)
+                    result_dict[options_key] = tmp_docs
+                    f.truncate(0)
+                    f.write(json.dumps(result_dict, indent=4))
+
+    docs = tmp_docs
+
+    table_layout(docs[:-1])
 
 
 if __name__ == "__main__":
