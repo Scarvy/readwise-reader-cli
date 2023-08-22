@@ -8,8 +8,6 @@ import requests
 import urllib3
 import dotenv
 
-from .document import DocumentInfo
-
 urllib3.disable_warnings()
 dotenv.load_dotenv()
 
@@ -103,48 +101,3 @@ def add_document(data: dict) -> None:
         print(f"Unexpected response: {response.status_code}")
 
     return response
-
-
-if __name__ == "__main__":
-    """List Documents"""
-    # Get all of a user's documents from all time
-    all_dcouemnts = fetch_documents()
-
-    # # Get all of a user's archived documents
-    archived_documents = fetch_documents(location="archive")
-
-    # Later, if you want to get new documents updated after some date in days, do this:
-    days = 1  # updated after N days
-    new_documents_later = fetch_documents(updated_after=days, location="later")
-
-    days = 1  # updated after N days
-    new_articles_later = fetch_documents(
-        updated_after=days, location="later", category="article"
-    )
-
-    """Save new Documents"""
-    # DocumentInfo class
-    document_one = DocumentInfo(
-        url="https://example.com",
-        html="<p>This is the content</p>",
-        title="Sample Document",
-        tags=["tag1", "tag2"],
-    )
-
-    # as a dictionary
-    document_one_dict = document_one.to_dict()
-    print(document_one_dict)
-
-    # as json
-    document_one_json = document_one.to_json()
-    print(document_one_json)
-
-    # from dictionary
-    document_two_dict = {
-        "url": "https://realpython.com/python-coding-setup-windows/",
-        "title": "Python Coding Setup on Windows",
-    }
-    document_two = DocumentInfo(**document_two_dict)
-    print(document_two.to_dict())
-
-    response = add_document(document_one_dict)
