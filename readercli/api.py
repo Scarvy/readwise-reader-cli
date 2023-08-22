@@ -22,13 +22,16 @@ def _convert_after_days(days: int = None) -> str:
 
 
 def fetch_documents(
-    updated_after: Optional[Union[str, int]] = None, location: str = None
+    updated_after: Optional[Union[str, int]] = None,
+    location: str = None,
+    category: str = None,
 ) -> List[dict] | List:
     """Fetches documents from the Readwise Reader API.
 
     Args:
         updated_after (str, int, optional): The date after which to fetch updated documents or N number of days.
         location (str, optional): The location to filter documents by.
+        category (str, optional): The category to filter documents by.
 
     Returns:
         List[dict] | List: A list of dictionaries containing document information.
@@ -45,6 +48,8 @@ def fetch_documents(
             params["updatedAfter"] = updated_after
         if location:
             params["location"] = location
+        if category:
+            params["category"] = category
         print("Making export api request with params " + str(params) + "...")
         response = requests.get(
             url="https://readwise.io/api/v3/list/",
@@ -103,14 +108,19 @@ def add_document(data: dict) -> None:
 if __name__ == "__main__":
     """List Documents"""
     # Get all of a user's documents from all time
-    all_data = fetch_documents()
+    all_dcouemnts = fetch_documents()
 
     # # Get all of a user's archived documents
-    archived_data = fetch_documents(location="archive")
+    archived_documents = fetch_documents(location="archive")
 
     # Later, if you want to get new documents updated after some date in days, do this:
     days = 1  # updated after N days
-    new_data = fetch_documents(updated_after=days, location="later")
+    new_documents_later = fetch_documents(updated_after=days, location="later")
+
+    days = 1  # updated after N days
+    new_articles_later = fetch_documents(
+        updated_after=days, location="later", category="article"
+    )
 
     """Save new Documents"""
     # DocumentInfo class
