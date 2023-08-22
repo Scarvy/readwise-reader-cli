@@ -24,6 +24,7 @@ def table_layout(documents):
     table.add_column("Category")
     table.add_column("Summary")
     table.add_column("Reading Progress")
+    table.add_column("Tags")
     table.add_column("Location", justify="right")
 
     for document in documents:
@@ -62,7 +63,14 @@ def table_layout(documents):
 
         location = Text(document["location"], style="blue")
 
-        table.add_row(title, author, category, summary, reading_progress, location)
+        tags = list(document["tags"].keys())
+        tags = ", ".join([tag for tag in tags])
+
+        tags = Text(tags, style="magenta") if tags else Text("No tags", style="italic")
+
+        table.add_row(
+            title, author, category, summary, reading_progress, tags, location
+        )
 
     console.print(table)
 
