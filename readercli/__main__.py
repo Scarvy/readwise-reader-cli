@@ -7,10 +7,9 @@ import click
 from xdg_base_dirs import xdg_data_home
 
 from .api import fetch_documents, add_document
-from .reading_list import load_reading_list
 from .layout import table_layout
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
-from .utils import add_document_batch
+from .utils import add_document_batch, build_readiing_list
 
 DEFAULT_CATEGORY_NAME = "all"
 
@@ -108,12 +107,13 @@ def add(url):
 
 
 @cli.command(help="Upload Reading List File")
-@click.argument("filename", type=click.Path(exists=True))
+@click.argument("filename", type=click.File("rb"))
 def upload(filename):
     click.echo(f"Adding Document(s) from file: {filename}")
-    reading_list = load_reading_list(filename)
-    documents_to_add = [{"url": document.url} for document in reading_list]
-    add_document_batch(documents_to_add)
+
+    reading_list = build_readiing_list(filename)
+
+    add_document_batch(reading_list)
 
 
 if __name__ == "__main__":
