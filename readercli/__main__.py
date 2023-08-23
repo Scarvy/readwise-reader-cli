@@ -1,94 +1,123 @@
-"""Provides code to interact with the Reader API in the command-line"""
-import argparse
+"""The main CLI module of readercli"""
+import os
+import json
+from datetime import datetime, timedelta
 
-from rich import print
+import click
+from xdg_base_dirs import xdg_data_home
 
 from .api import fetch_documents, add_document
-from .reading_list import load_reading_list
-from .constants import VALID_LOCATION_OPTIONS
-from .utils import count_category_values
+from .layout import table_layout
+from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
+from .utils import add_document_batch, build_reading_list
 
-# Use a dictionary for location options and descriptions
-LOCATION_DESCRIPTIONS = {
-    "new": "New Documents",
-    "later": "Later Documents",
-    "archive": "Archived Documents",
-    "feed": "Feed Documents",
-}
+DEFAULT_CATEGORY_NAME = "all"
+
+CACHE_DIR = xdg_data_home() / "reader"
+CACHED_RESULT_PATH = CACHE_DIR / "library.json"
+CACHE_EXPIRATION = 1  # Minutes
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Save or List Documents from Readwise Reader",
-    )
-    subparsers = parser.add_subparsers(dest="command", required=False)
+@click.group(help="Interact with your Reader Library")
+def cli():
+    pass
 
-    list_parser = subparsers.add_parser("list", help="List Documents")
-    list_parser.add_argument("-d", "--days", help="Updated after in days.")
-    list_parser.add_argument(
-        "-l",
-        "--location",
-        choices=VALID_LOCATION_OPTIONS,
-        help="Document location: `new`, `later`, `archive`, `feed`",
-    )
 
-    import_parser = subparsers.add_parser("import", help="Import Chrome Reading List")
-    import_parser.add_argument("-f", "--file", help="File path or name for HTML file")
+@cli.command(help="List Documents")
+@click.option(
+    "--location",
+    "-l",
+    default="archive",
+    show_default=True,
+    type=click.Choice(VALID_LOCATION_OPTIONS, case_sensitive=False),
+    help="Document(s) location",
+)
+@click.option(
+    "--category",
+    "-c",
+    type=click.Choice(VALID_CATEGORY_OPTIONS, case_sensitive=False),
+    help="Document(s) category",
+)
+@click.option(
+    "--update-after",
+    "-a",
+    type=click.DateTime(),
+    help="Updated after date in ISO format.",
+)
+@click.option(  # Don't hit Reader API
+    "--no-api",
+    is_flag=True,
+    default=False,
+    hidden=True,
+)
+def list(location, category, update_after, no_api=False):
+    update_after_str = update_after.strftime("%Y-%m-%d_%H-%M-%S")
 
-    add_parser = subparsers.add_parser("add", help="Add Document(s)")
-    add_parser.add_argument("-f", "--file", help="File path or name for HTML file")
-    add_parser.add_argument("-u", "--url", help="URL string for the document")
+    options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
 
-    args = parser.parse_args()
+    if no_api:  # check options_key
+        click.echo(options_key)
 
-    if args.command == "list":
-        try:
-            if args.location or args.days:
-                if args.days:
-                    try:
-                        days = int(args.days)
-                    except ValueError as e:
-                        print("Error: ", e)
-                        days = None  # switch to None if user inputs a incorrect value that's not an int
+    tmp_docs = None
+
+    if os.path.exists(CACHED_RESULT_PATH):
+        with open(CACHED_RESULT_PATH, "r") as f:
+            json_file = json.load(f)
+            result = json_file.get(options_key)
+            if result:
+                t = result[-1].get("time")
+                time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
+                diff = datetime.now() - time
+                if diff < timedelta(minutes=CACHE_EXPIRATION):
+                    print("Using cache instead!")
+                    tmp_docs = result
+
+    if not tmp_docs:  # If cache expired or results not yet cached
+        if no_api:
+            return
+
+        tmp_docs = fetch_documents(
+            updated_after=update_after, location=location, category=category
+        )
+
+        if len(tmp_docs) == 0:  # if list of documents is empty
+            return
+
+        else:  # Cache documents
+            tmp_docs.append({"time": str(datetime.now())})
+            os.makedirs(CACHE_DIR, exist_ok=True)
+
+            with open(CACHED_RESULT_PATH, "a+") as f:
+                if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
+                    result_dict = {options_key: tmp_docs}
+                    f.write(json.dumps(result_dict, indent=4))
                 else:
-                    days = args.days
-                full_data = fetch_documents(location=args.location, updated_after=days)
-            else:
-                full_data = fetch_documents()
-            print(full_data)
-            print("Number of documents:", len(full_data))
-            print("Category breakdown:", count_category_values(full_data))
-        except ValueError as e:
-            print("Error:", e)
-            if args.location not in VALID_LOCATION_OPTIONS:
-                print(f"'{args.location}' is not a valid location for Documents.")
-                print("Try:", ", ".join(LOCATION_DESCRIPTIONS.keys()))
+                    f.seek(0)
+                    result_dict = json.load(f)
+                    result_dict[options_key] = tmp_docs
+                    f.truncate(0)
+                    f.write(json.dumps(result_dict, indent=4))
 
-    elif args.command == "import":
-        print("Importing Reading List...")
-        reading_list = load_reading_list(args.file)
-        print(reading_list)
+    docs = tmp_docs
 
-    elif args.command == "add":
-        if args.file:
-            print(f"Adding Document(s) from file: {args.file}")
-            reading_list = load_reading_list(args.file)
-            documents_to_add = [{"url": document.url} for document in reading_list]
-            add_document_batch(documents_to_add)
-        elif args.url:
-            print(f"Adding Document from URL: {args.url}")
-            add_document(data={"url": args.url})
-        else:
-            print("No file or URL specified.")
-
-    else:
-        parser.print_help()
+    table_layout(docs[:-1])  # Slice off the time key before passing to layout
 
 
-def add_document_batch(documents: list[dict]) -> None:
-    for document in documents:
-        add_document(data={"url": document.url})
+@cli.command(help="Add Document")
+@click.argument("url")
+def add(url):
+    add_document(data={"url": url})
+
+
+@cli.command(help="Upload Reading List File")
+@click.argument("filename", type=click.File("rb"))
+def upload(filename):
+    click.echo(f"Adding Document(s) from file: {filename}")
+
+    reading_list = build_reading_list(filename)
+
+    add_document_batch(reading_list)
 
 
 if __name__ == "__main__":
-    main()
+    cli()
