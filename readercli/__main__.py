@@ -41,9 +41,8 @@ def cli():
 @click.option(
     "--update-after",
     "-a",
-    default=1,
-    show_default=True,
-    help="Updated after in number of days.",
+    type=click.DateTime(),
+    help="Updated after date in ISO format.",
 )
 @click.option(  # Don't hit Reader API
     "--no-api",
@@ -52,8 +51,12 @@ def cli():
     hidden=True,
 )
 def list(location, category, update_after, no_api=False):
-    options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after}"
-    click.echo(options_key)
+    update_after_str = update_after.strftime("%Y-%m-%d")
+
+    options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
+
+    if no_api:  # check options_key
+        click.echo(options_key)
 
     tmp_docs = None
 

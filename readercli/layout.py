@@ -26,6 +26,7 @@ def table_layout(documents):
     table.add_column("Reading Progress")
     table.add_column("Tags")
     table.add_column("Location", justify="right")
+    table.add_column("Last Update", justify="right")
 
     for document in documents:
         if (
@@ -61,15 +62,24 @@ def table_layout(documents):
         )
         title.stylize(f"yellow link {document['url']}")
 
-        location = Text(document["location"], style="blue")
-
         tags = list(document["tags"].keys())
         tags = ", ".join([tag for tag in tags])
 
         tags = Text(tags, style="magenta") if tags else Text("No tags", style="italic")
 
+        location = Text(document["location"], style="blue")
+
+        last_update = Text(document["updated_at"][:10])
+
         table.add_row(
-            title, author, category, summary, reading_progress, tags, location
+            title,
+            author,
+            category,
+            summary,
+            reading_progress,
+            tags,
+            location,
+            last_update,
         )
 
     console.print(table)

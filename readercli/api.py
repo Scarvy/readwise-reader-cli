@@ -1,7 +1,7 @@
 """Provides code to fetch and manage document information."""
 import os
 import time
-from typing import List, Optional, Union
+from typing import List
 
 import datetime
 import requests
@@ -12,22 +12,15 @@ urllib3.disable_warnings()
 dotenv.load_dotenv()
 
 
-def _convert_after_days(days: int = None) -> str:
-    return (
-        datetime.datetime.now()
-        - datetime.timedelta(days=((days := days) if days else 1))
-    ).isoformat()
-
-
 def fetch_documents(
-    updated_after: Optional[Union[str, int]] = None,
+    updated_after: datetime.datetime = None,
     location: str = None,
     category: str = None,
 ) -> List[dict] | List:
     """Fetches documents from the Readwise Reader API.
 
     Args:
-        updated_after (str, int, optional): The date after which to fetch updated documents or N number of days.
+        updated_after datetime: Update after datetime object.
         location (str, optional): The location to filter documents by.
         category (str, optional): The category to filter documents by.
 
@@ -41,9 +34,7 @@ def fetch_documents(
         if next_page_cursor:
             params["pageCursor"] = next_page_cursor
         if updated_after:
-            if isinstance(updated_after, int):
-                updated_after = _convert_after_days(updated_after)
-            params["updatedAfter"] = updated_after
+            params["updatedAfter"] = updated_after.isoformat()
         if location:
             params["location"] = location
         if category:
