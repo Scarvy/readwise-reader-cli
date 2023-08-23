@@ -51,7 +51,7 @@ def cli():
     hidden=True,
 )
 def list(location, category, update_after, no_api=False):
-    update_after_str = update_after.strftime("%Y-%m-%d")
+    update_after_str = update_after.strftime("%Y-%m-%d_%H-%M-%S")
 
     options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
 
