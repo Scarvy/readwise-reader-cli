@@ -9,6 +9,8 @@ console = Console()
 
 
 def reading_progress_format(reading_progress: float) -> str:
+    """Format reading progress percentage"""
+
     percentage_str = f"{round(reading_progress * 100, 2)}%"
     return percentage_str
 

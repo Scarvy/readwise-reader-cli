@@ -30,7 +30,15 @@ def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
     return datetime_obj.strftime(DATETIME_FORMAT)
 
 
-def build_reading_list(file_bytes):
+def build_reading_list(file_bytes: bytes) -> list[Bookmark]:
+    """Build reading list from html file.
+
+    Args:
+        file_bytes (bytes): bytes from file
+
+    Returns:
+        reading_list (list[dict]): A list of `Bookmark`s
+    """
     soup = BeautifulSoup(file_bytes, "html.parser")
 
     reading_list = [
@@ -45,7 +53,16 @@ def build_reading_list(file_bytes):
     return reading_list
 
 
-def count_category_values(documents: list[dict]) -> None:
+def count_category_values(documents: list[dict]) -> dict:
+    """Category counts
+
+    Args:
+        documents (list[dict]): A list of `Bookmark`s
+
+    Returns:
+        category_counts dict: a dictionary of category counts
+    """
+
     category_counts = {category: 0 for category in VALID_CATEGORY_OPTIONS}
 
     for item in documents:
@@ -57,5 +74,11 @@ def count_category_values(documents: list[dict]) -> None:
 
 
 def add_document_batch(documents: list[dict]) -> None:
+    """Batch documents to add to Reader Library.
+
+    Args:
+        documents (list[dict]): A list of `Bookmark`s
+    """
+
     for document in documents:
         add_document(data={"url": document.url})
