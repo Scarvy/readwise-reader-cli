@@ -9,7 +9,7 @@ from xdg_base_dirs import xdg_data_home
 from .api import fetch_documents, add_document
 from .layout import table_layout
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
-from .utils import add_document_batch, build_readiing_list
+from .utils import add_document_batch, build_reading_list
 
 DEFAULT_CATEGORY_NAME = "all"
 
@@ -111,7 +111,7 @@ def add(url):
 def upload(filename):
     click.echo(f"Adding Document(s) from file: {filename}")
 
-    reading_list = build_readiing_list(filename)
+    reading_list = build_reading_list(filename)
 
     add_document_batch(reading_list)
 

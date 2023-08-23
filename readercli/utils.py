@@ -30,7 +30,7 @@ def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
     return datetime_obj.strftime(DATETIME_FORMAT)
 
 
-def build_readiing_list(file_bytes):
+def build_reading_list(file_bytes):
     soup = BeautifulSoup(file_bytes, "html.parser")
 
     reading_list = [
