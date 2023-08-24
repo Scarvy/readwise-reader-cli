@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=65.5.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "readwise-reader-cli"
+version = "1.0.0"
+description = "Engage with your Readwise Reader library through your command-line."
+readme = "README.md"
+authors = [{ name = "Scarvy", email = "scottcarvalho71@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["api", "reader", "readwise"]
+dependencies = [
+    "click >= 8.1.3",
+    "requests",
+    "beautifulsoup4",
+    "python-dotenv",
+    "xdg-base-dirs",
+    "rich",
+]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["black", "isort", "pip-tools"]
+
+[project.urls]
+Homepage = "https://github.com/Scarvy/readwise-reader-cli"
+
+[project.scripts]
+calc = "readercli.__main__:cli"
