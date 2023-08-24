@@ -1,18 +1,31 @@
-"""starcli.layouts"""
+"""Provides code to print layouts to the command-line."""
 
-from rich.console import Console
+from datetime import datetime
 
+from rich.align import Align
+from rich.console import Console, group
+from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 
 console = Console()
 
 
-def reading_progress_format(reading_progress: float) -> str:
+def format_reading_progress(reading_progress: float) -> str:
     """Format reading progress percentage"""
 
     percentage_str = f"{round(reading_progress * 100, 2)}%"
     return percentage_str
+
+
+def format_published_date(timestamp_miliseconds: float) -> datetime:
+    """Format published date of a document"""
+
+    timestamp_seconds = timestamp_miliseconds / 1_000  # Convert microseconds to seconds
+
+    datetime_obj = datetime.fromtimestamp(timestamp_seconds)
+
+    return datetime_obj.strftime("%Y-%m-%d")
 
 
 def table_layout(documents):
@@ -52,7 +65,7 @@ def table_layout(documents):
         )
 
         reading_progress = (
-            Text(reading_progress_format(document["reading_progress"]))
+            Text(format_reading_progress(document["reading_progress"]))
             if document["reading_progress"]
             else Text("no reading progress", style="italic")
         )
@@ -85,6 +98,76 @@ def table_layout(documents):
         )
 
     console.print(table)
+
+
+def list_layout(documents):
+    """Display documents in a list layout using rich"""
+
+    width = 80
+
+    @group()
+    def render_document(document):
+        """Yields renderables for a single document."""
+        yield Rule(style="bright_yellow")
+        yield ""
+        # Table with summary and reading progress
+        title_table = Table.grid(padding=(0, 1))
+        title_table.expand = True
+        title = Text(document["title"], overflow="fold")
+        title.stylize(f"yellow link {document['url']}")
+
+        reading_progress = format_reading_progress(document["reading_progress"])
+        date_range_col = (
+            format_published_date(document["published_date"])
+            if document["published_date"]
+            else "No Publish Date"
+        )
+
+        title_table.add_row(title, Text(reading_progress, style="italic blue"))
+        title_table.columns[1].no_wrap = True
+        title_table.columns[1].justify = "right"
+        yield title_table
+        yield ""
+        summary_table = Table.grid(padding=(0, 1))
+        summary_table.expand = True
+        summary_col = (
+            Text(document["summary"], style="bold cyan")
+            if document["summary"]
+            else Text("no summary")
+        )
+        summary_table.add_row(summary_col, date_range_col)
+        summary_table.columns[1].justify = "right"
+        yield summary_table
+        yield ""
+        # tags
+        tags = list(document["tags"].keys())
+        tags = ", ".join([tag for tag in tags])
+
+        if tags:
+            yield Text(tags, style="magenta")
+        else:
+            yield Text("No tags", style="italic")
+        yield ""
+
+    def column(renderable):
+        """Constrain width and align to center to create a column."""
+        return Align.center(renderable, width=width, pad=False)
+
+    for document in documents:
+        if (
+            document["category"] == "highlight" or document["category"] == "note"
+        ):  # skip highlights and notes
+            continue
+        console.print(column(render_document(document)))
+    console.print(column(Rule(style="bright_yellow")))
+
+
+def print_layout(*args, layout):
+    """Use specified layout"""
+    if layout == "list":
+        list_layout(*args)
+    else:
+        table_layout(*args)
 
 
 if __name__ == "__main__":
@@ -289,4 +372,4 @@ if __name__ == "__main__":
         },
     ]
 
-    table_layout(documents=documents)
+    print_layout(documents, layout="list")
