@@ -1,6 +1,6 @@
-beautifulsoup4
-python-dotenv
-requests
-xdg-base-dirs
 rich
 click
+requests
+beautifulsoup4
+python-dotenv
+xdg-base-dirs
