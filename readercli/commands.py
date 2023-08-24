@@ -1,3 +1,4 @@
+"""Provides code to the subcommands to the Reader CLI"""
 import os
 import json
 from datetime import datetime, timedelta
