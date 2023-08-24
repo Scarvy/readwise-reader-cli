@@ -1,3 +1,5 @@
+"""Utility functions."""
+
 from datetime import datetime
 from collections import namedtuple
 from bs4 import BeautifulSoup
@@ -62,7 +64,6 @@ def count_category_values(documents: list[dict]) -> dict:
     Returns:
         category_counts dict: a dictionary of category counts
     """
-
     category_counts = {category: 0 for category in VALID_CATEGORY_OPTIONS}
 
     for item in documents:
