@@ -1,16 +1,17 @@
 # Reader API Command-Line Interface
 
-This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add`, `list`, and `import` documents into your Reader library. You can even import documents from your browser reading list, such as Chrome ReadingList.
+This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add` and `list` documents from your Reader library.
+
+Also, You can even `upload` documents from your browser reading list, such as Chrome ReadingList.
 
 Please note that future updates will include support for additional browsers.
 
 ## Installation
 
-1. Clone this repository to your local machine.
-2. Install the required dependencies by running:
+Set up a virtual environment and then run:
 
 ```bash
-pip install -r requirements.txt
+pip install readwise-reader-cli
 ```
 
 ## Usage
@@ -23,21 +24,56 @@ export READER_API_TOKEN={your_api_token}
 
 The CLI provides the following commands:
 
+```bash
+Usage: python -m readercli [OPTIONS] COMMAND [ARGS]...
+
+  Interact with your Reader Library
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  add     Add Document
+  list    List Documents
+  upload  Upload Reading List File
+```
+
 ### List Documents
 
-List documents from your Readwise account. You can specify the location to filter documents by using the `-l` or `--location` flag. Valid location options are: `new`, `later`, `archive`, and `feed`.
+```bash
+Usage: python -m readercli list [OPTIONS]
+
+  List Documents
+
+Options:
+  -l, --location [later|feed|new|archive]
+                                  Document(s) location  [default: archive]
+  -c, --category [email|highlight|video|note|tweet|article|epub|pdf|rss]
+                                  Document(s) category
+  -a, --update-after [%Y-%m-%d|%Y-%m-%dT%H:%M:%S|%Y-%m-%d %H:%M:%S]
+                                  Updated after date in ISO format.
+  --help                          Show this message and exit.
+```
 
 Example:
 
 ```bash
-python -m readercli list -l archive
+python -m readercli list --location archive
 ```
 
-### Import Chrome Reading List
+```bash
+python -m readercli list --location archive --location article
+```
+
+```bash
+python -m readercli list --location archive --location article --update-after 2023-01-01
+```
+
+### Upload a Reading List (Google Chrome support only)
 
 NOTE - There is no API to request ReadingList from Google, but It is being looked at [here](https://bugs.chromium.org/p/chromium/issues/detail?id=1238372).
 
-To import your Chrome Reading List, you first need to download your data from your account, then follow these steps:
+To `upload` your Chrome Reading List, you first need to download your data from your account, then follow these steps:
 
 1. Navigate to the [Data & Privacy](https://myaccount.google.com/data-and-privacy) section in your account.
 2. Find the "Download your data" option and click on it.
@@ -46,29 +82,38 @@ To import your Chrome Reading List, you first need to download your data from yo
 5. Save the downloaded `.html` file to your preferred directory and take note of the file path.
 6. Run the `import` command.
 
-
 ```bash
-python -m readercli import -f ReadingList
-python -m readercli import -f /path/to/CustomReadingList
+Usage: python -m readercli upload [OPTIONS] FILENAME
+
+  Upload Reading List File
+
+Options:
+  --help  Show this message and exit.
 ```
-
-### Add Document(s)
-
-Add a document to your Readwise account. You can either provide a file path or name for the HTML file using the `-f` or `--file` flag, or a URL string using the `-u` or `--url` flag.
 
 Examples:
 
 ```bash
-python -m readercli add -f ReadingList.html
-python -m readercli add -u https://example.com/document
+python -m readercli upload /path/to/CustomReadingList
 ```
 
-## Command-Line Arguments
+### Add Document
 
-- `-h, --help`: Show the help message and exit.
-- `-l, --location`: Document location for listing (`new`, `later`, `archive`, `feed`).
-- `-f, --file`: File path or name for HTML file.
-- `-u, --url`: URL string for the document.
+```bash
+Usage: python -m readercli add [OPTIONS] URL
+
+  Add Document
+
+Options:
+  --help  Show this message and exit.
+```
+
+Examples:
+
+```bash
+python -m readercli add 
+python -m readercli add http://www.example.com/
+```
 
 ## License
 
