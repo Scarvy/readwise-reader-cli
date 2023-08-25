@@ -34,13 +34,13 @@ def table_layout(documents):
     table = Table(leading=1)
 
     # make the columns
-    table.add_column("Title", style="bold yellow")
+    table.add_column("Title")
     table.add_column("Author")
-    table.add_column("Category")
+    table.add_column("Category", justify="center")
     table.add_column("Summary")
-    table.add_column("Reading Progress")
     table.add_column("Tags")
-    table.add_column("Location", justify="right")
+    table.add_column("Location", justify="center")
+    table.add_column("Reading Progress", justify="right")
     table.add_column("Last Update", justify="right")
 
     for document in documents:
@@ -49,51 +49,54 @@ def table_layout(documents):
         ):  # skip highlights and notes
             continue
         author = (
-            Text(document["author"], style="cyan")
+            Text(document["author"])
             if document["author"]
-            else Text("no author", style="italic")
+            else Text("no author", style="italic #EF476F")
         )
         category = (
-            Text(document["category"], style="cyan")
+            Text(document["category"])
             if document["category"]
             else Text("no category", style="italic")
         )
         summary = (
-            Text(document["summary"])
+            Text(document["summary"], style="#e4938e")
             if document["summary"]
             else Text("no summary", style="italic")
         )
 
         reading_progress = (
-            Text(format_reading_progress(document["reading_progress"]))
+            Text(
+                format_reading_progress(document["reading_progress"]),
+                style="bold #06D6A0",
+            )
             if document["reading_progress"]
-            else Text("no reading progress", style="italic")
+            else Text("no reading progress", style="italic #06D6A0")
         )
 
         title = (
-            Text(document["title"])
+            Text(document["title"], style="#FFE761")
             if document["title"]
-            else Text("no title", style="italic")
+            else Text("no title", style="italic #FFE761")
         )
-        title.stylize(f"yellow link {document['url']}")
+        title.stylize(f"#FFE761 link {document['url']}")
 
         tags = list(document["tags"].keys())
         tags = ", ".join([tag for tag in tags])
 
-        tags = Text(tags, style="magenta") if tags else Text("No tags", style="italic")
+        tags = Text(tags, style="#5278FE") if tags else Text("No tags", style="italic")
 
-        location = Text(document["location"], style="blue")
+        location = Text(document["location"])
 
-        last_update = Text(document["updated_at"][:10])
+        last_update = Text(document["updated_at"][:10], no_wrap=True)
 
         table.add_row(
             title,
             author,
             category,
             summary,
-            reading_progress,
             tags,
             location,
+            reading_progress,
             last_update,
         )
 
@@ -103,18 +106,18 @@ def table_layout(documents):
 def list_layout(documents):
     """Display documents in a list layout using rich"""
 
-    width = 80
+    width = 88
 
     @group()
     def render_document(document):
         """Yields renderables for a single document."""
-        yield Rule(style="bright_yellow")
+        yield Rule(style="#FFE761")
         yield ""
         # Table with summary and reading progress
         title_table = Table.grid(padding=(0, 1))
         title_table.expand = True
-        title = Text(document["title"], overflow="fold")
-        title.stylize(f"yellow link {document['url']}")
+        title = Text(document["title"], overflow="fold", style="#FFE761")
+        title.stylize(f"#FFE761 link {document['url']}")
 
         reading_progress = format_reading_progress(document["reading_progress"])
         date_range_col = (
@@ -123,7 +126,7 @@ def list_layout(documents):
             else "No Publish Date"
         )
 
-        title_table.add_row(title, Text(reading_progress, style="italic blue"))
+        title_table.add_row(title, Text(reading_progress, style="italic #06D6A0"))
         title_table.columns[1].no_wrap = True
         title_table.columns[1].justify = "right"
         yield title_table
@@ -131,7 +134,7 @@ def list_layout(documents):
         summary_table = Table.grid(padding=(0, 1))
         summary_table.expand = True
         summary_col = (
-            Text(document["summary"], style="bold cyan")
+            Text(document["summary"], style="#e4938e")
             if document["summary"]
             else Text("no summary")
         )
@@ -144,7 +147,7 @@ def list_layout(documents):
         tags = ", ".join([tag for tag in tags])
 
         if tags:
-            yield Text(tags, style="magenta")
+            yield Text(tags, style="#5278FE")
         else:
             yield Text("No tags", style="italic")
         yield ""
@@ -159,13 +162,15 @@ def list_layout(documents):
         ):  # skip highlights and notes
             continue
         console.print(column(render_document(document)))
-    console.print(column(Rule(style="bright_yellow")))
+    console.print(column(Rule(style="#574AE2")))
 
 
-def print_layout(*args, layout):
+def print_layout(*args, layout="table"):
     """Use specified layout"""
     if layout == "list":
         list_layout(*args)
+    elif layout == "table":
+        table_layout(*args)
     else:
         table_layout(*args)
 
@@ -372,4 +377,4 @@ if __name__ == "__main__":
         },
     ]
 
-    print_layout(documents, layout="list")
+    print_layout(documents, layout="table")
