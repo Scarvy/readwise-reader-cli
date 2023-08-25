@@ -71,11 +71,11 @@ python -m readercli list --location archive --location article --update-after 20
 
 ### Upload a Reading List (Google Chrome support only)
 
-NOTE - There is no API to request ReadingList from Google, but It is being looked at [here](https://bugs.chromium.org/p/chromium/issues/detail?id=1238372).
+NOTE - There is no API to request ReadingList from Google, but it is being looked at [here](https://bugs.chromium.org/p/chromium/issues/detail?id=1238372).
 
 To `upload` your Chrome Reading List, you first need to download your data from your account, then follow these steps:
 
-1. Navigate to the [Data & Privacy](https://myaccount.google.com/data-and-privacy) section in your account.
+1. Navigate to the [Data & Privacy](https://myaccount.google.com/data-and-privacy) section.
 2. Find the "Download your data" option and click on it.
 3. A list of data to export will appear. Click "Deselect all" and then locate the Chrome section.
 4. Click "All Chrome data Included" and select ONLY "ReadingList".
@@ -111,8 +111,7 @@ Options:
 Examples:
 
 ```bash
-python -m readercli add 
-python -m readercli add http://www.example.com/
+python -m readercli add http://www.example.com
 ```
 
 ## License
