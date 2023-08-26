@@ -162,7 +162,7 @@ def list_layout(documents):
         ):  # skip highlights and notes
             continue
         console.print(column(render_document(document)))
-    console.print(column(Rule(style="#574AE2")))
+    console.print(column(Rule(style="#FFE761")))
 
 
 def print_layout(*args, layout="table"):
@@ -377,4 +377,53 @@ if __name__ == "__main__":
         },
     ]
 
-    print_layout(documents, layout="table")
+    print_layout(documents, layout="list")
+
+    highlight_notes_data = [
+        {
+            "id": "01h7mzsn5tbe0bjqnr3gmj2bv9",
+            "url": "https://read.readwise.io/read/01h7mzsn5tbe0bjqnr3gmj2bv9",
+            "title": None,
+            "author": None,
+            "source": "reader-mobile-app",
+            "category": "note",
+            "location": None,
+            "tags": None,
+            "site_name": None,
+            "word_count": None,
+            "created_at": "2023-08-12T13:43:28.919967+00:00",
+            "updated_at": "2023-08-12T13:43:28.919980+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "Pragmatism is a philosophical approach that emphasizes practicality and usefulness over abstract theories or principles. It originated in the United States in the late 19th century and was developed by philosophers such as William James and John Dewey. Pragmatists believe that the value of an idea or belief lies in its ability to solve problems and improve people's lives. They emphasize experimentation, observation, and experience as the basis for knowledge and reject the idea of absolute truth or certainty. Pragmatism has had a significant influence on American culture and has been applied in fields such as education, politics, and business.",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h7mzsdxnr5jhkk9phq4e7r6f",
+            "reading_progress": 0,
+        },
+        {
+            "id": "01h7mzsdxnr5jhkk9phq4e7r6f",
+            "url": "https://read.readwise.io/read/01h7mzsdxnr5jhkk9phq4e7r6f",
+            "title": None,
+            "author": None,
+            "source": "reader-mobile-app",
+            "category": "highlight",
+            "location": None,
+            "tags": {},
+            "site_name": None,
+            "word_count": None,
+            "created_at": "2023-08-12T13:43:21.391437+00:00",
+            "updated_at": "2023-08-12T13:43:28.966254+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "pragmatism",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h7mqyeq11jt98epzcfbpde9e",
+            "reading_progress": 0,
+        },
+    ]
+
+    # notes and highlights layout option
