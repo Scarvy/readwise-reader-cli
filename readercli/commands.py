@@ -7,7 +7,7 @@ import click
 from xdg_base_dirs import xdg_data_home
 
 from .api import fetch_documents, add_document
-from .layout import table_layout
+from .layout import print_layout
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .utils import add_document_batch, build_reading_list
 
@@ -40,13 +40,19 @@ CACHE_EXPIRATION = 1  # Minutes
     type=click.DateTime(),
     help="Updated after date in ISO format.",
 )
+@click.option(
+    "--layout",
+    "-L",
+    type=click.Choice(["list", "table"], case_sensitive=True),
+    help="Display documents either as a list or table",
+)
 @click.option(  # Don't hit Reader API
     "--no-api",
     is_flag=True,
     default=False,
     hidden=True,
 )
-def list(location, category, update_after, no_api=False):
+def list(location, category, update_after, layout, no_api=False):
     update_after_str = update_after.strftime("%Y-%m-%d")
 
     options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
@@ -96,7 +102,9 @@ def list(location, category, update_after, no_api=False):
 
     docs = tmp_docs
 
-    table_layout(docs[:-1])  # Slice off the time key before passing to layout
+    print_layout(
+        docs[:-1], layout=layout
+    )  # Slice off the time key before passing to layout
 
 
 @click.command(help="Add Document")
