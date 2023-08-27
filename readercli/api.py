@@ -90,14 +90,19 @@ def add_document(data: dict) -> None:
         response = add_document(data)
 
     if response.status_code == 201:
-        print("Document added successfully!")
+        # print("Document added successfully!")  # log instead of print
+        pass
     elif response.status_code == 200:
-        print("Document already exist.")
+        # print("Document already exist.")
+        pass
     elif response.status_code == 401:
-        print("Failed to add document. Please provide a valid API key.")
+        # print("Failed to add document. Please provide a valid API key.")
+        pass
     elif response.status_code == 500:
-        print("An error occurred while adding the document. Please try again later.")
+        # print("An error occurred while adding the document. Please try again later.")
+        pass
     else:
-        print(f"Unexpected response: {response.status_code}")
+        # print(f"Unexpected response: {response.status_code}")
+        pass
 
     return response
