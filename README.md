@@ -63,15 +63,15 @@ python -m readercli list --location archive
 ```
 
 ```bash
-python -m readercli list --location archive --location article
+python -m readercli list --location archive --category article
 ```
 
 ```bash
-python -m readercli list --location archive --location article --update-after 2023-01-01
+python -m readercli list --location archive --category article --update-after 2023-01-01
 ```
 
 ```bash
-python -m readercli list --location archive --location article --update-after 2023-01-01 --layout list
+python -m readercli list --location archive --category article --update-after 2023-01-01 --layout list
 ```
 
 ### Upload a Reading List (Google Chrome support only)
