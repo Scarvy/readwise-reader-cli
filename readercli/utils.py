@@ -1,5 +1,5 @@
 """Utility functions."""
-
+import csv
 from datetime import datetime
 from collections import namedtuple
 from bs4 import BeautifulSoup
@@ -32,25 +32,64 @@ def utcfromtimestamp_in_microseconds(timestamp_microseconds: float) -> datetime:
     return datetime_obj.strftime(DATETIME_FORMAT)
 
 
-def build_reading_list(file_bytes: bytes) -> list[Bookmark]:
-    """Build reading list from html file.
+def is_valid_url(url: str):
+    """Validate URL"""
+    return url.startswith("http://") or url.startswith("https://")
+
+
+def build_reading_list(input_file: str, file_type: str) -> list[Bookmark]:
+    """Build reading list from a file.
 
     Args:
-        file_bytes (bytes): bytes from file
+        input_file: file name
+        file_type (str): file type
 
     Returns:
         reading_list (list[dict]): A list of `Bookmark`s
     """
-    soup = BeautifulSoup(file_bytes, "html.parser")
+    reading_list = []
 
-    reading_list = [
-        Bookmark(
-            link.text,
-            link.get("href"),
-            utcfromtimestamp_in_microseconds(float(link.get("add_date"))),
-        )
-        for link in soup.find_all("a")
-    ]
+    if file_type == "html":
+        with open(input_file, "r") as f:
+            content = f.read()
+
+            soup = BeautifulSoup(content, "html.parser")
+
+            for link in soup.find_all("a"):
+                url = link.get("href")
+                if url and is_valid_url(url):
+                    title = link.get_text()
+                    add_date = utcfromtimestamp_in_microseconds(
+                        float(link.get("add_date"))
+                    )
+                    bookmark = Bookmark(title, url, add_date)
+                    reading_list.append(bookmark)
+                else:
+                    print(f"URL is invalid. {url}")
+
+    elif file_type == "csv":
+        with open(input_file, "r") as f:
+            reader = csv.reader(f)
+
+            header = next(reader)  # Read the header row
+
+            url_index = header.index("URL") if "URL" in header else None
+
+            if url_index is not None:
+                for row in reader:
+                    if len(row) >= 1:
+                        url = row[0]
+                        if url and is_valid_url(url):
+                            title = row[1] if len(row) >= 2 else None
+                            add_date = row[2] if len(row) >= 3 else None
+                            if url:
+                                bookmark = Bookmark(title, url, add_date)
+                                reading_list.append(bookmark)
+                        else:
+                            print(f"URL is invalid. {url}")
+
+    else:
+        print("Invalid file type.")
 
     return reading_list
 

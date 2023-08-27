@@ -114,10 +114,11 @@ def add(url):
 
 
 @click.command(help="Upload Reading List File")
-@click.argument("filename", type=click.File("rb"))
-def upload(filename):
-    click.echo(f"Adding Document(s) from file: {filename}")
+@click.argument("input_file", type=click.Path(exists=True))
+@click.option("--file-type", type=click.Choice(["html", "csv"]), default="html")
+def upload(input_file, file_type):
+    click.echo(f"Adding Document(s) from file: {input_file}")
 
-    reading_list = build_reading_list(filename)
+    reading_list = build_reading_list(input_file=input_file, file_type=file_type)
 
     add_document_batch(reading_list)
