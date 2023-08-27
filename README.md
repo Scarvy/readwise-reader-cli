@@ -76,7 +76,11 @@ python -m readercli list --location archive --category article --update-after 20
 
 ### Upload a Reading List (Google Chrome support only)
 
-NOTE - There is no API to request ReadingList from Google, but it is being looked at [here](https://bugs.chromium.org/p/chromium/issues/detail?id=1238372).
+**THINGS TO NOTE:**
+
+- **RATE LIMIT - Due to Reader's API rate limit of 20 requests per minute, a larger list will take a few minutes to upload.**
+
+- **LACK OF READING LIST APIs - There is no API to pull your ReadingList from Google, but it is being looked at [here](https://bugs.chromium.org/p/chromium/issues/detail?id=1238372).**
 
 To `upload` your Chrome Reading List, you first need to download your data from your account, then follow these steps:
 
