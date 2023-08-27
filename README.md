@@ -48,10 +48,11 @@ Usage: python -m readercli list [OPTIONS]
 Options:
   -l, --location [later|feed|new|archive]
                                   Document(s) location  [default: archive]
-  -c, --category [email|highlight|video|note|tweet|article|epub|pdf|rss]
+  -c, --category [pdf|highlight|epub|rss|tweet|video|email|note|article]
                                   Document(s) category
   -a, --update-after [%Y-%m-%d|%Y-%m-%dT%H:%M:%S|%Y-%m-%d %H:%M:%S]
                                   Updated after date in ISO format.
+  -L, --layout [list|table]       Display documents either as a list or table
   --help                          Show this message and exit.
 ```
 
@@ -69,6 +70,10 @@ python -m readercli list --location archive --location article
 python -m readercli list --location archive --location article --update-after 2023-01-01
 ```
 
+```bash
+python -m readercli list --location archive --location article --update-after 2023-01-01 --layout list
+```
+
 ### Upload a Reading List (Google Chrome support only)
 
 NOTE - There is no API to request ReadingList from Google, but it is being looked at [here](https://bugs.chromium.org/p/chromium/issues/detail?id=1238372).
@@ -83,18 +88,23 @@ To `upload` your Chrome Reading List, you first need to download your data from 
 6. Run the `import` command.
 
 ```bash
-Usage: python -m readercli upload [OPTIONS] FILENAME
+Usage: python -m readercli upload [OPTIONS] INPUT_FILE
 
   Upload Reading List File
 
 Options:
-  --help  Show this message and exit.
+  --file-type [html|csv]
+  --help                  Show this message and exit.
 ```
 
 Examples:
 
 ```bash
-python -m readercli upload /path/to/CustomReadingList
+python -m readercli upload /path/to/ReadingList.html
+```
+
+```bash
+python -m readercli upload --file-type csv /path/to/ReadingList.csv
 ```
 
 ### Add Document
