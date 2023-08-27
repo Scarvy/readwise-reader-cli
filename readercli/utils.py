@@ -2,6 +2,8 @@
 import csv
 from datetime import datetime
 from collections import namedtuple
+
+from rich.progress import track
 from bs4 import BeautifulSoup
 
 from .api import add_document
@@ -120,5 +122,5 @@ def add_document_batch(documents: list[dict]) -> None:
         documents (list[dict]): A list of `Bookmark`s
     """
 
-    for document in documents:
+    for document in track(documents, description="Uploading..."):
         add_document(data={"url": document.url})
