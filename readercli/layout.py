@@ -10,6 +10,25 @@ from rich.text import Text
 
 console = Console()
 
+emoji_mapping_category = {
+    "article": ":newspaper-emoji: article",
+    "email": ":envelope-emoji: email",
+    "rss": ":satellite_antenna-emoji: rss",
+    "highlight": ":crayon-emoji: highlight",
+    "note": ":memo-emoji: note",
+    "pdf": ":page_facing_up-emoji: pdf",
+    "epub": ":book-emoji: epub",
+    "tweet": ":bird-emoji: tweet",
+    "video": ":video_camera-emoji: video",
+}
+
+emoji_mapping_location = {
+    "new": ":star-emoji: new",
+    "later": ":clock2-emoji: later",
+    "archive": ":file_cabinet-emoji: archive",
+    "feed": ":newspaper2-emoji: feed",
+}
+
 
 def format_reading_progress(reading_progress: float) -> str:
     """Format reading progress percentage"""
@@ -28,82 +47,130 @@ def format_published_date(timestamp_miliseconds: float) -> datetime:
     return datetime_obj.strftime("%Y-%m-%d")
 
 
-def table_layout(documents):
+def table_layout(documents, category):
     """Displays documents in a table format using rich"""
 
     table = Table(leading=1)
 
-    # make the columns
-    table.add_column("Title")
-    table.add_column("Author")
-    table.add_column("Category", justify="center")
-    table.add_column("Summary")
-    table.add_column("Tags")
-    table.add_column("Location", justify="center")
-    table.add_column("Reading Progress", justify="right")
-    table.add_column("Last Update", justify="right")
+    if category in ["note", "highlight"]:
+        table.add_column(":link: Highlight Link")
+        table.add_column(":file_folder: Category", justify="center")
+        table.add_column(":clipboard: Content")
+        table.add_column(":label: Tags")
+        table.add_column(":world_map: Location", justify="center")
+        table.add_column(":clock1: Last Update", justify="right")
 
-    for document in documents:
-        if (
-            document["category"] == "highlight" or document["category"] == "note"
-        ):  # skip highlights and notes
-            continue
-        author = (
-            Text(document["author"])
-            if document["author"]
-            else Text("no author", style="italic #EF476F")
-        )
-        category = (
-            Text(document["category"])
-            if document["category"]
-            else Text("no category", style="italic")
-        )
-        summary = (
-            Text(document["summary"], style="#e4938e")
-            if document["summary"]
-            else Text("no summary", style="italic")
-        )
+        for document in documents:
+            category = (
+                emoji_mapping_category[document["category"]]
+                if document["category"]
+                else Text("no category", style="italic")
+            )
+            content = Text(document["content"], style="#e4938e")
 
-        reading_progress = (
-            Text(
+            title = Text("link", style="#FFE761")
+            title.stylize(f"#FFE761 link {document['url']}")
+
+            if document["tags"]:
+                tags = list(document["tags"].keys())
+                tags = ", ".join([tag for tag in tags])
+
+                tags = Text(tags, style="#5278FE")
+            else:
+                tags = ":x: tags"
+
+            location = (
+                emoji_mapping_location[document["location"]]
+                if document["location"]
+                else ":x: None"
+            )
+
+            last_update = Text(document["updated_at"][:10], no_wrap=True)
+
+            table.add_row(
+                title,
+                category,
+                content,
+                tags,
+                location,
+                last_update,
+            )
+
+    else:
+        # make the columns
+        table.add_column(":bookmark: Title")
+        table.add_column(":bust_in_silhouette: Author")
+        table.add_column(":file_folder: Category", justify="center")
+        table.add_column(":clipboard: Summary")
+        table.add_column(":label: Tags")
+        table.add_column(":world_map: Location", justify="center")
+        table.add_column(":hourglass: Reading Progress", justify="right")
+        table.add_column(":clock1: Last Update", justify="right")
+
+        for document in documents:
+            if (
+                document["category"] == "highlight" or document["category"] == "note"
+            ):  # skip highlights and notes
+                continue
+            author = (
+                Text(document["author"])
+                if document["author"]
+                else Text("no author", style="italic #EF476F")
+            )
+            category = (
+                emoji_mapping_category[document["category"]]
+                if document["category"]
+                else Text("no category", style="italic")
+            )
+            summary = (
+                Text(document["summary"], style="#e4938e")
+                if document["summary"]
+                else ":x: no summary"
+            )
+
+            reading_progress = Text(
                 format_reading_progress(document["reading_progress"]),
                 style="bold #06D6A0",
             )
-            if document["reading_progress"]
-            else Text("no reading progress", style="italic #06D6A0")
-        )
 
-        title = (
-            Text(document["title"], style="#FFE761")
-            if document["title"]
-            else Text("no title", style="italic #FFE761")
-        )
-        title.stylize(f"#FFE761 link {document['url']}")
+            title = (
+                Text(document["title"], style="#FFE761")
+                if document["title"]
+                else Text("no title", style="italic #FFE761")
+            )
+            title.stylize(f"#FFE761 link {document['url']}")
 
-        tags = list(document["tags"].keys())
-        tags = ", ".join([tag for tag in tags])
+            if document["tags"]:
+                tags = list(document["tags"].keys())
+                tags = ", ".join([tag for tag in tags])
 
-        tags = Text(tags, style="#5278FE") if tags else Text("No tags", style="italic")
+                tags = Text(tags, style="#5278FE")
+            else:
+                tags = ":x: tags"
 
-        location = Text(document["location"])
+            location = (
+                emoji_mapping_location[document["location"]]
+                if document["location"]
+                else ":x: None"
+            )
 
-        last_update = Text(document["updated_at"][:10], no_wrap=True)
+            last_update = Text(document["updated_at"][:10], no_wrap=True)
 
-        table.add_row(
-            title,
-            author,
-            category,
-            summary,
-            tags,
-            location,
-            reading_progress,
-            last_update,
-        )
+            table.add_row(
+                title,
+                author,
+                category,
+                summary,
+                tags,
+                location,
+                reading_progress,
+                last_update,
+            )
 
     console.print(table)
 
 
-def list_layout(documents):
+def list_layout(documents, category=None):
     """Display documents in a list layout using rich"""
 
     width = 88
@@ -165,14 +232,14 @@ def list_layout(documents):
     console.print(column(Rule(style="#FFE761")))
 
 
-def print_layout(*args, layout="table"):
+def print_layout(*args, layout="table", category=None):
     """Use specified layout"""
     if layout == "list":
-        list_layout(*args)
+        list_layout(*args, category=category)
     elif layout == "table":
-        table_layout(*args)
+        table_layout(*args, category=category)
     else:
-        table_layout(*args)
+        table_layout(*args, category=category)
 
 
 if __name__ == "__main__":
@@ -377,9 +444,7 @@ if __name__ == "__main__":
         },
     ]
 
-    print_layout(documents, layout="list")
-
-    highlight_notes_data = [
+    notes = [
         {
             "id": "01h7mzsn5tbe0bjqnr3gmj2bv9",
             "url": "https://read.readwise.io/read/01h7mzsn5tbe0bjqnr3gmj2bv9",
@@ -403,6 +468,75 @@ if __name__ == "__main__":
             "reading_progress": 0,
         },
         {
+            "id": "01h5fkadcpf5ea8srh9y1b9ws6",
+            "url": "https://read.readwise.io/read/01h5fkadcpf5ea8srh9y1b9ws6",
+            "title": None,
+            "author": None,
+            "source": "reader-web-app",
+            "category": "note",
+            "location": None,
+            "tags": None,
+            "site_name": None,
+            "word_count": None,
+            "created_at": "2023-07-16T14:58:36.391838+00:00",
+            "updated_at": "2023-07-16T14:58:36.391851+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "Write for a particular person in mind",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h5fk9y1shfjvvvtr7z0hvc9n",
+            "reading_progress": 0,
+        },
+        {
+            "id": "01h8m0et3vf7f3a0c7nbmhkxjg",
+            "url": "https://read.readwise.io/read/01h8m0et3vf7f3a0c7nbmhkxjg",
+            "title": None,
+            "author": None,
+            "source": "reader-web-app",
+            "category": "note",
+            "location": "later",
+            "tags": None,
+            "site_name": None,
+            "word_count": 0,
+            "created_at": "2023-08-24T14:51:29.042109+00:00",
+            "updated_at": "2023-08-24T14:51:29.042125+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": 'Begets: "Begets" is a verb that means to cause or bring about something. It is often used in the context of a negative cycle or pattern that perpetuates itself, such as "violence begets violence" or "ignorance begets ignorance." In programming, the phrase "bad code begets bad code" suggests that poorly written code can lead to more poorly written code, creating a cycle of inefficiency and difficulty in maintaining the program.',
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h8m0eks760p1bj583wf9jcas",
+            "reading_progress": 0,
+        },
+        {
+            "id": "01h8jjvrk39s3hhvc3wf7ns1d4",
+            "url": "https://read.readwise.io/read/01h8jjvrk39s3hhvc3wf7ns1d4",
+            "title": None,
+            "author": None,
+            "source": "reader-mobile-app",
+            "category": "note",
+            "location": "later",
+            "tags": None,
+            "site_name": None,
+            "word_count": 0,
+            "created_at": "2023-08-24T01:34:39.239540+00:00",
+            "updated_at": "2023-08-24T01:34:39.239552+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "Sentry is a tool that helps developers fix problems with their computer programs. It tells them when something is wrong with the code and helps them figure out what caused the problem. Sentry can also track the health of different parts of the program and can help find the root cause of issues. This is important because programs are becoming more complex and it's harder for developers to keep track of everything. With Sentry, developers can make sure the program is working properly and giving customers a good experience.",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h8jjvevyktpjpsb0pkf0edmy",
+            "reading_progress": 0,
+        },
+    ]
+
+    highlights = [
+        {
             "id": "01h7mzsdxnr5jhkk9phq4e7r6f",
             "url": "https://read.readwise.io/read/01h7mzsdxnr5jhkk9phq4e7r6f",
             "title": None,
@@ -424,6 +558,72 @@ if __name__ == "__main__":
             "parent_id": "01h7mqyeq11jt98epzcfbpde9e",
             "reading_progress": 0,
         },
+        {
+            "id": "01h8ppzy1frk0e7gpheef5n177",
+            "url": "https://read.readwise.io/read/01h8ppzy1frk0e7gpheef5n177",
+            "title": None,
+            "author": None,
+            "source": "reader-web-app",
+            "category": "highlight",
+            "location": "later",
+            "tags": {
+                "funny": {"name": "funny", "type": "manual", "created": 1692979442334},
+                "cartoon": {
+                    "name": "cartoon",
+                    "type": "manual",
+                    "created": 1692979444972,
+                },
+                "drawing": {
+                    "name": "drawing",
+                    "type": "manual",
+                    "created": 1692979447744,
+                },
+            },
+            "site_name": None,
+            "word_count": 0,
+            "created_at": "2023-08-25T16:03:47.588823+00:00",
+            "updated_at": "2023-08-25T16:04:08.343874+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "\n\n\n\n",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h8p7edag0ax4hnx4ks8vw8he",
+            "reading_progress": 0,
+        },
+        {
+            "id": "01h8pprff81qa4n10bfxkyc3nk",
+            "url": "https://read.readwise.io/read/01h8pprff81qa4n10bfxkyc3nk",
+            "title": None,
+            "author": None,
+            "source": "reader-web-app",
+            "category": "highlight",
+            "location": "later",
+            "tags": {
+                "stoic": {"name": "stoic", "type": "manual", "created": 1692979205575},
+                "marcus-aurelius": {
+                    "name": "marcus-aurelius",
+                    "type": "manual",
+                    "created": 1692979201653,
+                },
+            },
+            "site_name": None,
+            "word_count": 0,
+            "created_at": "2023-08-25T15:59:43.430440+00:00",
+            "updated_at": "2023-08-25T16:00:05.956298+00:00",
+            "published_date": None,
+            "summary": None,
+            "image_url": None,
+            "content": "character is fate.",
+            "source_url": None,
+            "notes": "",
+            "parent_id": "01h8nzjf1sgrpgp4zk58d9zhw6",
+            "reading_progress": 0,
+        },
     ]
 
     # notes and highlights layout option
+    print_layout(documents, layout="table", category=None)
+    print_layout(highlights, layout="table", category="highlight")
+    print_layout(notes, layout="table", category="note")
