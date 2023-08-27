@@ -80,6 +80,15 @@ def add_document(data: dict) -> None:
         json=data,
     )
 
+    if response.status_code == 429:
+        print("Received a 429 response - Too Many Requests")
+        retry_after = int(
+            response.headers.get("Retry-After", 5)
+        )  # Default to 5 seconds if no Retry-After header
+        print(f"Retrying after {retry_after} seconds...")
+        time.sleep(retry_after)
+        response = add_document(data)
+
     if response.status_code == 201:
         print("Document added successfully!")
     elif response.status_code == 200:
