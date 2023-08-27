@@ -103,7 +103,7 @@ def list(location, category, update_after, layout, no_api=False):
     docs = tmp_docs
 
     print_layout(
-        docs[:-1], layout=layout
+        docs[:-1], layout=layout, category=category
     )  # Slice off the time key before passing to layout
 
 
