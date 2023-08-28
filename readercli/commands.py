@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 import click
 from xdg_base_dirs import xdg_data_home
 
-from .api import fetch_documents, add_document
 from .layout import print_layout
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
-from .utils import add_document_batch, build_reading_list
+from .utils import build_reading_list, batch_add_documents
+from .api import APIHandler
 
 DEFAULT_CATEGORY_NAME = "all"
 
@@ -78,7 +78,8 @@ def list(location, category, update_after, layout, no_api=False):
         if no_api:
             return
 
-        tmp_docs = fetch_documents(
+        api = APIHandler()
+        tmp_docs = api.fetch_documents(
             updated_after=update_after, location=location, category=category
         )
 
@@ -110,15 +111,18 @@ def list(location, category, update_after, layout, no_api=False):
 @click.command(help="Add Document")
 @click.argument("url")
 def add(url):
-    add_document(data={"url": url})
+    data = {"url": url}  # plan to add more option like title, tags etc.
+
+    api = APIHandler()
+    api.add_document(data=data)
 
 
 @click.command(help="Upload Reading List File")
 @click.argument("input_file", type=click.Path(exists=True))
 @click.option("--file-type", type=click.Choice(["html", "csv"]), default="html")
 def upload(input_file, file_type):
-    click.echo(f"Adding Document(s) from file: {input_file}")
+    click.echo(f"Adding Document(s) from: {input_file}")
 
     reading_list = build_reading_list(input_file=input_file, file_type=file_type)
 
-    add_document_batch(reading_list)
+    batch_add_documents(reading_list)

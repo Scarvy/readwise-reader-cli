@@ -7,7 +7,7 @@ from click import secho
 from rich.progress import Progress
 from bs4 import BeautifulSoup
 
-from .api import add_document
+from .api import APIHandler
 from .constants import VALID_CATEGORY_OPTIONS
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -123,12 +123,14 @@ def print_report(adds, exists, failures, total):
     secho(f"Failures: {failures}", fg="bright_red")
 
 
-def add_document_batch(documents: list[dict]) -> None:
+def batch_add_documents(documents: list[Bookmark]) -> None:
     """Batch documents to add to Reader Library.
 
     Args:
         documents (list[dict]): A list of `Bookmark`s
     """
+
+    api = APIHandler()
 
     number_of_documents = len(documents)
 
@@ -141,7 +143,7 @@ def add_document_batch(documents: list[dict]) -> None:
         task = progress.add_task("Uploading...", total=number_of_documents)
 
         for document in documents:
-            status_code = add_document(data={"url": document.url})
+            status_code = api.add_document(data={"url": document.url})
 
             if status_code == 201:
                 adds += 1
