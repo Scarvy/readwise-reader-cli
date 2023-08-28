@@ -3,7 +3,8 @@ import csv
 from datetime import datetime
 from collections import namedtuple
 
-from rich.progress import track
+from click import secho
+from rich.progress import Progress
 from bs4 import BeautifulSoup
 
 from .api import add_document
@@ -67,7 +68,7 @@ def build_reading_list(input_file: str, file_type: str) -> list[Bookmark]:
                     bookmark = Bookmark(title, url, add_date)
                     reading_list.append(bookmark)
                 else:
-                    print(f"URL is invalid. {url}")
+                    secho(f"URL is invalid. {url}", fg="bright_red")
 
     elif file_type == "csv":
         with open(input_file, "r") as f:
@@ -88,7 +89,7 @@ def build_reading_list(input_file: str, file_type: str) -> list[Bookmark]:
                                 bookmark = Bookmark(title, url, add_date)
                                 reading_list.append(bookmark)
                         else:
-                            print(f"URL is invalid. {url}")
+                            secho(f"URL is invalid. {url}", fg="bright_red")
 
     else:
         print("Invalid file type.")
@@ -115,6 +116,13 @@ def count_category_values(documents: list[dict]) -> dict:
     return category_counts
 
 
+def print_report(adds, exists, failures, total):
+    secho("\nReport:")
+    secho(f"Additions: {adds} out of {total}", fg="bright_green")
+    secho(f"Already Exists: {exists}", fg="bright_yellow")
+    secho(f"Failures: {failures}", fg="bright_red")
+
+
 def add_document_batch(documents: list[dict]) -> None:
     """Batch documents to add to Reader Library.
 
@@ -122,5 +130,28 @@ def add_document_batch(documents: list[dict]) -> None:
         documents (list[dict]): A list of `Bookmark`s
     """
 
-    for document in track(documents, description="Uploading..."):
-        add_document(data={"url": document.url})
+    number_of_documents = len(documents)
+
+    # track counts
+    adds = 0
+    exists = 0
+    failures = 0
+
+    with Progress() as progress:
+        task = progress.add_task("Uploading...", total=number_of_documents)
+
+        for document in documents:
+            status_code = add_document(data={"url": document.url})
+
+            if status_code == 201:
+                adds += 1
+                progress.update(task, advance=1, description="Success")
+            elif status_code == 200:
+                adds += 1
+                exists += 1
+                progress.update(task, advance=1, description="Already Exists")
+            else:
+                failures += 1
+                progress.update(task, advance=1, description="Failure")
+
+    print_report(adds, exists, failures, number_of_documents)
