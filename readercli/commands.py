@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import click
 from xdg_base_dirs import xdg_data_home
 
-from .layout import print_layout
+from .layout import print_results
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .utils import build_reading_list, batch_add_documents
 from .api import APIHandler
@@ -22,7 +22,7 @@ CACHE_EXPIRATION = 1  # Minutes
 @click.option(
     "--location",
     "-l",
-    default="archive",
+    default="new",
     show_default=True,
     type=click.Choice(VALID_LOCATION_OPTIONS, case_sensitive=False),
     help="Document(s) location",
@@ -43,16 +43,17 @@ CACHE_EXPIRATION = 1  # Minutes
 @click.option(
     "--layout",
     "-L",
-    type=click.Choice(["list", "table"], case_sensitive=True),
-    help="Display documents either as a list or table",
+    type=click.Choice(["table", "list"], case_sensitive=True),
+    help="Display documents either as a list or table. Default is table.",
 )
+@click.option("--pager", "-P", is_flag=True, default=False, help="Use to page output.")
 @click.option(  # Don't hit Reader API
     "--no-api",
     is_flag=True,
     default=False,
     hidden=True,
 )
-def list(location, category, update_after, layout, no_api=False):
+def list(location, category, update_after, layout, pager=False, no_api=False):
     update_after_str = update_after.strftime("%Y-%m-%d")
 
     options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
@@ -101,11 +102,9 @@ def list(location, category, update_after, layout, no_api=False):
                     f.truncate(0)
                     f.write(json.dumps(result_dict, indent=4))
 
-    docs = tmp_docs
+    docs = tmp_docs[:-1]  # Slice off the time key before passing to layout
 
-    print_layout(
-        docs[:-1], layout=layout, category=category
-    )  # Slice off the time key before passing to layout
+    print_results(docs, page=pager, layout=layout, category=category)
 
 
 @click.command(help="Add Document")

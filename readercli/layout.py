@@ -47,12 +47,12 @@ def format_published_date(timestamp_miliseconds: float) -> datetime:
     return datetime_obj.strftime("%Y-%m-%d")
 
 
-def table_layout(documents, category):
+def table_layout(documents, category=""):
     """Displays documents in a table format using rich"""
 
     table = Table(leading=1)
 
-    if category in ["note", "highlight"]:
+    if category in ("note", "highlight"):
         table.add_column(":link: Highlight Link")
         table.add_column(":file_folder: Category", justify="center")
         table.add_column(":clipboard: Content")
@@ -232,11 +232,18 @@ def list_layout(documents, category=None):
     console.print(column(Rule(style="#FFE761")))
 
 
-def print_layout(*args, layout="table", category=None):
-    """Use specified layout"""
+def print_results(docuemnts, page=False, layout="", category=""):
+    """Use a layout to print or page the fetched documents"""
+    if page:
+        with console.pager(styles=True):
+            print_layout(docuemnts, layout=layout, category=category)
+        return
+    print_layout(docuemnts, layout=layout, category=category)
+
+
+def print_layout(documents, category="", layout="table"):
+    """Use listed layout"""
     if layout == "list":
-        list_layout(*args, category=category)
-    elif layout == "table":
-        table_layout(*args, category=category)
+        list_layout(documents, category=category)
     else:
-        table_layout(*args, category=category)
+        table_layout(documents, category=category)
