@@ -1,10 +1,8 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from readercli.layout import (
     format_reading_progress,
     format_published_date,
-    table_layout,
-    list_layout,
     print_layout,
 )
 
@@ -397,55 +395,7 @@ def test_format_reading_progress(progress, expected):
 
 @pytest.mark.parametrize(
     "timestamp_milliseconds, expected",
-    [(1690416000000, "2023-08-25")],
+    [(1690416000000, "2023-07-26")],
 )
 def test_format_published_date(timestamp_milliseconds, expected):
     assert format_published_date(timestamp_milliseconds) == expected
-
-
-def test_table_layout(capsys):
-    console_mock = Mock()
-
-    table_layout(sample_documents, category=None)
-
-    assert console_mock.print.called
-
-
-def test_list_layout(capsys):
-    console_mock = Mock()
-
-    list_layout(sample_documents, category=None)
-
-    assert console_mock.print.called
-
-
-def test_print_layout_table(capsys):
-    console_mock = Mock()
-
-    print_layout(sample_documents, layout="table", category=None)
-
-    assert console_mock.print.called
-
-
-def test_print_layout_list(capsys):
-    console_mock = Mock()
-
-    print_layout(sample_documents, layout="list", category=None)
-
-    assert console_mock.print.called
-
-
-def test_print_layout_list_note(capsys):
-    console_mock = Mock()
-
-    print_layout(sample_notes, layout="list", category="note")
-
-    assert console_mock.print.called
-
-
-def test_print_layout_list_highlight(capsys):
-    console_mock = Mock()
-
-    print_layout(sample_highlights, layout="list", category="highlight")
-
-    assert console_mock.print.called

@@ -37,7 +37,7 @@ class APIHandler:
     def __init__(self, token=None):
         if token is None:
             token = os.getenv("READER_API_TOKEN")
-        if token is None:
+        else:
             raise ValueError("API token not provided.")
 
         self.session = requests.Session()
@@ -50,7 +50,7 @@ class APIHandler:
     def validate_token(self, token: str) -> str:
         """Check that a token is valid."""
 
-        response = self.session.get("https://readwise.io/api/v2/auth/", verify=False)
+        response = requests.get("https://readwise.io/api/v2/auth/")
         handling_code = self.HTTP_CODE_HANDLING[str(response.status_code)]
         if not handling_code == "valid":
             secho(f"Invalid token - check your token at {_TOKEN_URL}", fg="bright_red")
