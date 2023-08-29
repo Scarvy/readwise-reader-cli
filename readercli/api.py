@@ -91,10 +91,9 @@ class APIHandler:
 
             logger.info("Fetch: %s ...", params)
 
-            response = requests.get(
+            response = self.session.get(
                 url="https://readwise.io/api/v3/list/",
                 params=params,
-                headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
                 verify=False,
             )
 
