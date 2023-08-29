@@ -47,15 +47,18 @@ class APIHandler:
         )
 
     @classmethod
-    def validate_token(self, token: str) -> str:
+    def validate_token(self, token: str) -> bool:
         """Check that a token is valid."""
 
-        response = requests.get("https://readwise.io/api/v2/auth/")
+        response = requests.get(
+            "https://readwise.io/api/v2/auth/",
+            headers={"Authorization": f"Token {token}"},
+        )
         handling_code = self.HTTP_CODE_HANDLING[str(response.status_code)]
         if not handling_code == "valid":
             secho(f"Invalid token - check your token at {_TOKEN_URL}", fg="bright_red")
-            return
-        return token
+            return False
+        return True
 
     def fetch_documents(
         self,
