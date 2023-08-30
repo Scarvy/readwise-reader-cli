@@ -26,7 +26,7 @@ emoji_mapping_location = {
     "new": ":star-emoji: new",
     "later": ":clock2-emoji: later",
     "archive": ":file_cabinet-emoji: archive",
-    "feed": ":newspaper2-emoji: feed",
+    "feed": ":inbox_tray-emoji: feed",
 }
 
 
@@ -63,8 +63,8 @@ def table_layout(documents, category=""):
         for document in documents:
             category = (
                 emoji_mapping_category[document["category"]]
-                if document["category"]
-                else Text("no category", style="italic")
+                if document["location"]
+                else ":x: category"
             )
             content = Text(document["content"], style="#e4938e")
 
