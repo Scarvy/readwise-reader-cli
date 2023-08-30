@@ -80,11 +80,13 @@ class APIHandler:
         full_data = []
         next_page_cursor = None
 
+        updated_after = updated_after.isoformat() if updated_after else updated_after
+
         while True:
             # construct parameters
             params = {
                 "pageCursor": next_page_cursor,
-                "updateAfter": updated_after.isoformat(),
+                "updateAfter": updated_after,
                 "location": location,
                 "category": category,
             }
