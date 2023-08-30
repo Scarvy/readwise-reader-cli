@@ -22,15 +22,13 @@ CACHE_EXPIRATION = 1  # Minutes
 @click.option(
     "--location",
     "-l",
-    default="new",
-    show_default=True,
-    type=click.Choice(VALID_LOCATION_OPTIONS, case_sensitive=False),
+    type=click.Choice(VALID_LOCATION_OPTIONS, case_sensitive=True),
     help="Document(s) location",
 )
 @click.option(
     "--category",
     "-c",
-    type=click.Choice(VALID_CATEGORY_OPTIONS, case_sensitive=False),
+    type=click.Choice(VALID_CATEGORY_OPTIONS, case_sensitive=True),
     help="Document(s) category",
 )
 @click.option(
