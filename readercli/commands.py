@@ -1,15 +1,23 @@
 """Subcommands of the main CLI module"""
-import os
 import json
+import os
 from datetime import datetime, timedelta
 
 import click
+from click import secho
 from xdg_base_dirs import xdg_data_home
 
-from .layout import print_results
-from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
-from .utils import build_reading_list, batch_add_documents
 from .api import APIHandler
+from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
+from .data import fetch_full_library
+from .layout import print_results
+from .utils import (
+    batch_add_documents,
+    build_reading_list,
+    count_category_values,
+    count_location_values,
+    count_tag_values,
+)
 
 DEFAULT_CATEGORY_NAME = "all"
 
@@ -103,6 +111,29 @@ def list(location, category, update_after, layout, pager=False, no_api=False):
     docs = tmp_docs[:-1]  # Slice off the time key before passing to layout
 
     print_results(docs, page=pager, layout=layout, category=category)
+
+
+@click.command(help="Library breakdown")
+@click.option(
+    "--view",
+    "-V",
+    default="category",
+    type=click.Choice(["category", "location", "tags"], case_sensitive=True),
+)
+def lib(view):
+    full_data = fetch_full_library()
+
+    if view == "location":
+        location_breakdown = count_location_values(full_data)
+        secho(location_breakdown, fg="cyan")
+
+    elif view == "tags":
+        tag_breakdown = count_tag_values(full_data)
+        secho(tag_breakdown, fg="bright_green")
+
+    else:
+        category_breakdown = count_category_values(full_data)
+        secho(category_breakdown, fg="magenta")
 
 
 @click.command(help="Add Document")

@@ -8,7 +8,7 @@ from rich.progress import Progress
 from bs4 import BeautifulSoup
 
 from .api import APIHandler
-from .constants import VALID_CATEGORY_OPTIONS
+from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 CHROME_DEFAULT_FILENAME = "ReadingList"
@@ -98,14 +98,6 @@ def build_reading_list(input_file: str, file_type: str) -> list[Bookmark]:
 
 
 def count_category_values(documents: list[dict]) -> dict:
-    """Category counts
-
-    Args:
-        documents (list[dict]): A list of `Bookmark`s
-
-    Returns:
-        category_counts dict: a dictionary of category counts
-    """
     category_counts = {category: 0 for category in VALID_CATEGORY_OPTIONS}
 
     for item in documents:
@@ -114,6 +106,36 @@ def count_category_values(documents: list[dict]) -> dict:
             category_counts[category] += 1
 
     return category_counts
+
+
+def count_location_values(documents: list[dict]) -> dict:
+    location_counts = {location: 0 for location in VALID_LOCATION_OPTIONS}
+
+    for item in documents:
+        location = item.get("location")
+        if location in location_counts:
+            location_counts[location] += 1
+
+    return location_counts
+
+
+def count_tag_values(documents: list[dict]) -> dict:
+    tag_counts = {}
+
+    for item in documents:
+        tags = item.get("tags", {})
+        if tags:
+            for tag_name, _ in tags.items():
+                if tag_name in tag_counts:
+                    tag_counts[tag_name] += 1
+                else:
+                    tag_counts[tag_name] = 1
+
+    sorted_tag_counts = dict(
+        sorted(tag_counts.items(), key=lambda item: item[1], reverse=True)
+    )
+
+    return sorted_tag_counts
 
 
 def print_report(adds, exists, failures, total):
