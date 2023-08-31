@@ -286,22 +286,3 @@ def print_layout(documents, category="", layout="table"):
         list_layout(documents, category=category)
     else:
         table_layout(documents, category=category)
-
-
-if __name__ == "__main__":
-    category_view = {
-        "highlight": 728,
-        "pdf": 68,
-        "note": 161,
-        "video": 8,
-        "article": 329,
-        "tweet": 24,
-        "email": 320,
-        "epub": 4,
-        "rss": 358,
-    }
-
-    location_view = {"new": 2, "archive": 1095, "feed": 13, "later": 147}
-
-    print_view_results(category_view, view="category")
-    print_view_results(location_view, view="location")
