@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "readwise-reader-cli"
-version = "1.0.1"
+version = "1.0.2"
 description = "Engage with your Readwise Reader library through your command-line."
 readme = "README.md"
 authors = [{ name = "Scarvy", email = "scottcarvalho71@gmail.com" }]
@@ -17,6 +17,7 @@ classifiers = [
 keywords = ["api", "readwise", "cli", "python"]
 dependencies = [
     "click >= 8.1.3",
+    "python-dateutl",
     "requests",
     "beautifulsoup4",
     "python-dotenv",

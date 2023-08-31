@@ -1,6 +1,7 @@
 """Provides code to print layouts to the command-line."""
 
 from datetime import datetime
+from dateutil import tz, parser
 
 from rich.align import Align
 from rich.console import Console, group
@@ -42,9 +43,19 @@ def format_published_date(timestamp_miliseconds: float) -> datetime:
 
     timestamp_seconds = timestamp_miliseconds / 1_000  # Convert microseconds to seconds
 
-    datetime_obj = datetime.fromtimestamp(timestamp_seconds)
+    datetime_obj = datetime.fromtimestamp(timestamp_seconds, tz=tz.tzlocal())
 
     return datetime_obj.strftime("%Y-%m-%d")
+
+
+def format_updated_at_date(updated_at: str) -> str:
+    """Format updated at date"""
+
+    parsed_time = parser.isoparse(updated_at)
+
+    local_time = parsed_time.astimezone(tz.tzlocal())
+
+    return local_time.strftime("%Y-%m-%d")
 
 
 def table_layout(documents, category=""):
@@ -85,7 +96,9 @@ def table_layout(documents, category=""):
                 else ":x: None"
             )
 
-            last_update = Text(document["updated_at"][:10], no_wrap=True)
+            last_update = Text(
+                format_updated_at_date(document["updated_at"]), no_wrap=True
+            )
 
             table.add_row(
                 title,
@@ -154,7 +167,9 @@ def table_layout(documents, category=""):
                 else ":x: None"
             )
 
-            last_update = Text(document["updated_at"][:10], no_wrap=True)
+            last_update = Text(
+                format_updated_at_date(document["updated_at"]), no_wrap=True
+            )
 
             table.add_row(
                 title,
