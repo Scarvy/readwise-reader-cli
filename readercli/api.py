@@ -86,7 +86,7 @@ class APIHandler:
             # construct parameters
             params = {
                 "pageCursor": next_page_cursor,
-                "updateAfter": updated_after,
+                "updatedAfter": updated_after,
                 "location": location,
                 "category": category,
             }
@@ -118,7 +118,11 @@ class APIHandler:
                     )
                     break
 
-            full_data.extend(response.json()["results"])
+            results = response.json().get("results")
+
+            if results:
+                full_data.extend(results)
+
             next_page_cursor = response.json().get("nextPageCursor")
 
             if not next_page_cursor:
