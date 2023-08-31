@@ -30,6 +30,11 @@ emoji_mapping_location = {
     "feed": ":inbox_tray-emoji: feed",
 }
 
+emoji_mapping = {
+    "category": emoji_mapping_category,
+    "location": emoji_mapping_location,
+}
+
 
 def format_reading_progress(reading_progress: float) -> str:
     """Format reading progress percentage"""
@@ -247,6 +252,25 @@ def list_layout(documents, category=None):
     console.print(column(Rule(style="#FFE761")))
 
 
+def print_view_results(stats: dict, view: str = ""):
+    emojis = emoji_mapping[view]
+
+    table = Table(title=f"{view.title()} Breakdown")
+
+    sorted_tag_counts = dict(
+        sorted(stats.items(), key=lambda item: item[1], reverse=True)
+    )
+
+    table.add_column("Name", justify="left", no_wrap=True)
+    table.add_column("Count", justify="right", style="cyan", no_wrap=True)
+
+    for name, value in sorted_tag_counts.items():
+        table.add_row(emojis[name], str(value))
+
+    console = Console()
+    console.print(table)
+
+
 def print_results(docuemnts, page=False, layout="", category=""):
     """Use a layout to print or page the fetched documents"""
     if page:
@@ -262,3 +286,22 @@ def print_layout(documents, category="", layout="table"):
         list_layout(documents, category=category)
     else:
         table_layout(documents, category=category)
+
+
+if __name__ == "__main__":
+    category_view = {
+        "highlight": 728,
+        "pdf": 68,
+        "note": 161,
+        "video": 8,
+        "article": 329,
+        "tweet": 24,
+        "email": 320,
+        "epub": 4,
+        "rss": 358,
+    }
+
+    location_view = {"new": 2, "archive": 1095, "feed": 13, "later": 147}
+
+    print_view_results(category_view, view="category")
+    print_view_results(location_view, view="location")
