@@ -17,7 +17,7 @@ classifiers = [
 keywords = ["api", "readwise", "cli", "python"]
 dependencies = [
     "click >= 8.1.3",
-    "python-dateutl",
+    "python-dateutil",
     "requests",
     "beautifulsoup4",
     "python-dotenv",
