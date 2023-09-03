@@ -253,7 +253,8 @@ def list_layout(documents, category=None):
 
 
 def print_view_results(stats: dict, view: str = ""):
-    emojis = emoji_mapping[view]
+    if not view == "tags":
+        emojis = emoji_mapping[view]
 
     table = Table(title=f"{view.title()} Breakdown")
 
@@ -265,7 +266,10 @@ def print_view_results(stats: dict, view: str = ""):
     table.add_column("Count", justify="right", style="cyan", no_wrap=True)
 
     for name, value in sorted_tag_counts.items():
-        table.add_row(emojis[name], str(value))
+        if view == "tags":
+            table.add_row(name, str(value))
+        else:
+            table.add_row(emojis[name], str(value))
 
     console = Console()
     console.print(table)
