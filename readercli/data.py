@@ -34,7 +34,6 @@ def fetch_full_library() -> list[dict] | None:
                 time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
                 diff = datetime.now() - time
                 if diff < timedelta(days=CACHE_EXPIRATION):
-                    print("Using cache instead!")
                     tmp_library = result
 
     if not tmp_library:
