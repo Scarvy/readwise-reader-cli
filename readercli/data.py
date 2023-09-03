@@ -37,7 +37,7 @@ def fetch_full_library() -> list[dict] | None:
                     print("Using cache instead!")
                     tmp_library = result
 
-    else:
+    if not tmp_library:
         api = APIHandler()
 
         tmp_library = (
