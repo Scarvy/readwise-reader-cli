@@ -13,11 +13,11 @@ from .data import fetch_full_library
 from .layout import print_results, print_view_results
 from .utils import (
     batch_add_documents,
-    build_reading_list,
     count_category_values,
     count_location_values,
     count_tag_values,
 )
+from .reading_list import build_reading_list
 
 DEFAULT_CATEGORY_NAME = "all"
 

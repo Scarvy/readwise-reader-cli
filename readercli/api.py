@@ -122,17 +122,17 @@ def fetch_documents(
     return full_data
 
 
-def add_document(data: dict) -> int:
+def add_document(metadata: dict) -> int:
     """Adds a document to a users Reader account.
 
     Args:
-        data (dict): The data of the document to be added.
+        metadata (dict): Metadata about a specific document to be added.
     """
     while True:
         response = requests.post(
             url=f"{_BASE_URL}{_CREATE_ENDPOINT}",
             headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
-            json=data,
+            json=metadata,
         )
 
         if not response.status_code in (201, 200):
