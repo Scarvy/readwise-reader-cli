@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from xdg_base_dirs import xdg_data_home
 
-from readercli.api import APIHandler
+from readercli.api import fetch_documents
 
 
 CACHE_DIR = xdg_data_home() / "reader"
@@ -37,10 +37,8 @@ def fetch_full_library() -> list[dict] | None:
                     tmp_library = result
 
     if not tmp_library:
-        api = APIHandler()
-
         tmp_library = (
-            api.fetch_documents()
+            fetch_documents()
         )  # fetch full library including all documents, notes, and highlights
 
         if len(tmp_library) == 0:  # if library is empty

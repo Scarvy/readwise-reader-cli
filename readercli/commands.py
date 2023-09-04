@@ -4,9 +4,10 @@ import os
 from datetime import datetime, timedelta
 
 import click
+from click import secho
 from xdg_base_dirs import xdg_data_home
 
-from .api import APIHandler
+from .api import add_document, fetch_documents, validate_token
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
@@ -84,8 +85,7 @@ def list(location, category, update_after, layout, pager=False, no_api=False):
         if no_api:
             return
 
-        api = APIHandler()
-        tmp_docs = api.fetch_documents(
+        tmp_docs = fetch_documents(
             updated_after=update_after, location=location, category=category
         )
 
@@ -136,9 +136,11 @@ def lib(view):
 @click.argument("url")
 def add(url):
     data = {"url": url}  # plan to add more option like title, tags etc.
-
-    api = APIHandler()
-    api.add_document(data=data)
+    response = add_document(data=data)
+    if response.status_code == 200:
+        secho(f"Already Exists.", fg="yellow")
+    else:
+        secho(f"Added!", fg="bright_green")
 
 
 @click.command(help="Upload Reading List File")
@@ -150,3 +152,11 @@ def upload(input_file, file_type):
     reading_list = build_reading_list(input_file=input_file, file_type=file_type)
 
     batch_add_documents(reading_list)
+
+
+@click.command(help="Validate token")
+@click.argument("token", type=str)
+def validate(token):
+    is_valid = validate_token(token)
+    if is_valid:
+        secho("Token is valid", fg="bright_green")

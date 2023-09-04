@@ -7,7 +7,7 @@ from click import secho
 from rich.progress import Progress
 from bs4 import BeautifulSoup
 
-from .api import APIHandler
+from .api import add_document
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -139,7 +139,7 @@ def count_tag_values(documents: list[dict]) -> dict:
 
 
 def print_report(adds, exists, failures, total):
-    secho("\nReport:")
+    secho("Report:")
     secho(f"Additions: {adds} out of {total}", fg="bright_green")
     secho(f"Already Exists: {exists}", fg="bright_yellow")
     secho(f"Failures: {failures}", fg="bright_red")
@@ -151,9 +151,6 @@ def batch_add_documents(documents: list[Bookmark]) -> None:
     Args:
         documents (list[dict]): A list of `Bookmark`s
     """
-
-    api = APIHandler()
-
     number_of_documents = len(documents)
 
     # track counts
@@ -165,12 +162,12 @@ def batch_add_documents(documents: list[Bookmark]) -> None:
         task = progress.add_task("Uploading...", total=number_of_documents)
 
         for document in documents:
-            status_code = api.add_document(data={"url": document.url})
+            response = add_document(data={"url": document.url})
 
-            if status_code == 201:
+            if response.status_code == 201:
                 adds += 1
                 progress.update(task, advance=1, description="Success")
-            elif status_code == 200:
+            elif response.status_code == 200:
                 adds += 1
                 exists += 1
                 progress.update(task, advance=1, description="Already Exists")

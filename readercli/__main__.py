@@ -9,10 +9,11 @@ def cli():
 
 
 # Commands
-cli.add_command(commands.list)  # List command
 cli.add_command(commands.add)  # Add command
-cli.add_command(commands.lib)  # library overview command
+cli.add_command(commands.list)  # List command
+cli.add_command(commands.lib)  # Library command
 cli.add_command(commands.upload)  # Upload command
+cli.add_command(commands.validate)  # Validate command
 
 if __name__ == "__main__":
     cli()
