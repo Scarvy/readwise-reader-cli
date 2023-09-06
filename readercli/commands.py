@@ -44,13 +44,19 @@ CACHE_EXPIRATION = 1  # Minutes
     "-a",
     default=(datetime.now() - timedelta(days=1)),
     type=click.DateTime(),
-    help="Updated after date in ISO format.",
+    help="Updated after date in ISO format. Default: last 24hrs.",
 )
 @click.option(
     "--layout",
     "-L",
     type=click.Choice(["table", "list"], case_sensitive=True),
-    help="Display documents either as a list or table. Default is table.",
+    help="Display documents either as a list or table. Default: table.",
+)
+@click.option(
+    "--num-results",
+    "-n",
+    type=int,
+    help="The number of documents to show.",
 )
 @click.option("--pager", "-P", is_flag=True, default=False, help="Use to page output.")
 @click.option(  # Don't hit Reader API
@@ -59,7 +65,9 @@ CACHE_EXPIRATION = 1  # Minutes
     default=False,
     hidden=True,
 )
-def list(location, category, update_after, layout, pager=False, no_api=False):
+def list(
+    location, category, update_after, layout, num_results, pager=False, no_api=False
+):
     update_after_str = update_after.strftime("%Y-%m-%d")
 
     options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
@@ -107,7 +115,12 @@ def list(location, category, update_after, layout, pager=False, no_api=False):
                     f.truncate(0)
                     f.write(json.dumps(result_dict, indent=4))
 
-    docs = tmp_docs[:-1]  # Slice off the time key before passing to layout
+    if num_results:
+        docs = tmp_docs[
+            0 : max(1, num_results)
+        ]  # Prevent removing all documents from the list
+    else:
+        docs = tmp_docs[:-1]  # Slice off the time key before passing to layout
 
     print_results(docs, page=pager, layout=layout, category=category)
 
