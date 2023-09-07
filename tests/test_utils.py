@@ -1,59 +1,23 @@
 import pytest
-from unittest.mock import MagicMock, patch
-from datetime import datetime
 
-from readercli.utils import (
-    utcfromtimestamp_in_microseconds,
-    is_valid_url,
-    # build_reading_list,
-    # count_category_values,
-    # batch_add_documents,
+from datetime import datetime, timedelta
+
+from readercli.utils import convert_date_range
+
+
+@pytest.fixture(
+    params=[
+        ("today", timedelta(days=1)),
+        ("week", timedelta(weeks=1)),
+        ("month", timedelta(days=30)),
+    ]
 )
+def date_range_fixture(request):
+    return request.param
 
 
-@pytest.mark.parametrize(
-    "timestamp_microseconds, expected_result",
-    [
-        (1630110400000000, "2021-08-28 00:26:40"),
-        # Add more test cases if needed
-    ],
-)
-def test_utcfromtimestamp_in_microseconds(timestamp_microseconds, expected_result):
-    result = utcfromtimestamp_in_microseconds(timestamp_microseconds)
-    assert result == expected_result
-
-
-def test_is_valid_url_valid():
-    url = "https://www.example.com"
-    result = is_valid_url(url)
-    assert result is True
-
-
-def test_is_valid_url_invalid():
-    url = "htps://www.example.com"
-    result = is_valid_url(url)
-    assert result is False
-
-
-# class MockAPIHandler:
-#     def add_document(self, data):
-#         if "error" in data["url"]:
-#             return 500
-#         elif "exists" in data["url"]:
-#             return 200
-#         else:
-#             return 201
-
-
-# @patch("your_module.APIHandler", MockAPIHandler)
-# def test_batch_add_documents():
-#     documents = [
-#         MagicMock(url="https://www.example.com/add"),
-#         MagicMock(url="https://www.example.com/exists"),
-#         MagicMock(url="https://www.example.com/error"),
-#     ]
-
-#     with patch("builtins.print") as mock_print:
-#         batch_add_documents(documents)
-
-#         assert mock_print.call_count == 1  # Check if print_report is called
+def test_convert_date_range(date_range_fixture):
+    date_range_option, expected_timedelta = date_range_fixture
+    expected_date = datetime.now() - expected_timedelta
+    actual_date = convert_date_range(date_range_option)
+    assert abs((expected_date - actual_date).total_seconds()) < 1

@@ -1,10 +1,19 @@
 """Utility functions."""
+from datetime import datetime, timedelta
+
 from click import secho
 from rich.progress import Progress
 
 from .api import add_document
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .document import DocumentInfo
+
+
+DATE_RANGE_MAP = {"today": {"days": 1}, "week": {"weeks": 1}, "month": {"days": 30}}
+
+
+def convert_date_range(date_range: str) -> datetime:
+    return datetime.now() - timedelta(**DATE_RANGE_MAP[date_range])
 
 
 def count_category_values(documents: list[dict]) -> dict:

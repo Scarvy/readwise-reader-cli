@@ -12,6 +12,7 @@ from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
 from .utils import (
+    convert_date_range,
     batch_add_documents,
     count_category_values,
     count_location_values,
@@ -47,6 +48,12 @@ CACHE_EXPIRATION = 1  # Minutes
     help="Updated after date in ISO format. Default: last 24hrs.",
 )
 @click.option(
+    "--date-range",
+    "-d",
+    type=str,
+    help="View documents updated after choosen time: day, week, month.",
+)
+@click.option(
     "--layout",
     "-L",
     type=click.Choice(["table", "list"], case_sensitive=True),
@@ -66,8 +73,18 @@ CACHE_EXPIRATION = 1  # Minutes
     hidden=True,
 )
 def list(
-    location, category, update_after, layout, num_results, pager=False, no_api=False
+    location,
+    category,
+    update_after,
+    date_range,
+    layout,
+    num_results,
+    pager=False,
+    no_api=False,
 ):
+    if date_range:
+        update_after = convert_date_range(date_range=date_range)
+
     update_after_str = update_after.strftime("%Y-%m-%d")
 
     options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
