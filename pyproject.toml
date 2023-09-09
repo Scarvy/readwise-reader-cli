@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "readwise-reader-cli"
-version = "1.0.2"
+version = "1.0.3"
 description = "Engage with your Readwise Reader library through your command-line."
 readme = "README.md"
 authors = [{ name = "Scarvy", email = "scottcarvalho71@gmail.com" }]
@@ -27,7 +27,16 @@ dependencies = [
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
-dev = ["black", "isort", "pip-tools"]
+test = [
+    "pre-commit",
+    "pytest",
+    "pytest-cov"
+]
+dev = [
+    "black",
+    "isort",
+    "pip-tools"
+]
 
 [project.urls]
 Homepage = "https://github.com/Scarvy/readwise-reader-cli"
