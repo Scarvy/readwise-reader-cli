@@ -7,18 +7,18 @@ import click
 from click import secho
 from xdg_base_dirs import xdg_data_home
 
-from .api import add_document, fetch_documents, validate_token
+from .api import add_document, list_documents, validate_token
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
+from .reading_list import build_reading_list
 from .utils import (
-    convert_date_range,
     batch_add_documents,
+    convert_date_range,
     count_category_values,
     count_location_values,
     count_tag_values,
 )
-from .reading_list import build_reading_list
 
 DEFAULT_CATEGORY_NAME = "all"
 
@@ -103,21 +103,23 @@ def list(
                 time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
                 diff = datetime.now() - time
                 if diff < timedelta(minutes=CACHE_EXPIRATION):
-                    print("Using cache instead!")
+                    print("Using cache instead.")
                     tmp_docs = result
 
     if not tmp_docs:  # If cache expired or results not yet cached
         if no_api:
             return
 
-        tmp_docs = fetch_documents(
-            updated_after=update_after, location=location, category=category
+        tmp_docs = list_documents(
+            category=category, location=location, updated_after=update_after
         )
 
         if len(tmp_docs) == 0:  # if list of documents is empty
             return
 
         else:  # Cache documents
+            tmp_docs = [doc.model_dump(mode="json") for doc in tmp_docs]
+
             tmp_docs.append({"time": str(datetime.now())})
             os.makedirs(CACHE_DIR, exist_ok=True)
 

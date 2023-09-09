@@ -8,7 +8,6 @@ from .api import add_document
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .document import DocumentInfo
 
-
 DATE_RANGE_MAP = {"today": {"days": 1}, "week": {"weeks": 1}, "month": {"days": 30}}
 
 

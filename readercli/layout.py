@@ -1,8 +1,8 @@
 """Provides code to print layouts to the command-line."""
 
 from datetime import datetime
-from dateutil import tz, parser
 
+from dateutil import parser, tz
 from rich.align import Align
 from rich.console import Console, group
 from rich.rule import Rule

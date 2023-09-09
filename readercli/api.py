@@ -1,26 +1,27 @@
 """Provides code to fetch and manage document information."""
+import logging
 import os
 import time
-import logging
-from typing import List
-
-import datetime
-import requests
-import urllib3
+from datetime import datetime
+from typing import List, Optional, Tuple
 
 import dotenv
+import requests
+import urllib3
 from click import secho
+from requests import Response
+
+from readercli.constants import (
+    AUTH_TOKEN_URL,
+    BASE_URL,
+    CREATE_ENDPOINT,
+    LIST_ENDPOINT,
+    TOKEN_URL,
+)
+from readercli.document import DocumentInfo, ListParameters
 
 urllib3.disable_warnings()
 dotenv.load_dotenv()
-
-
-_TOKEN_URL = "https://readwise.io/access_token"
-
-_BASE_URL = "https://readwise.io/api/v3/"
-_AUTH_TOKEN_ENDPOINT = "https://readwise.io/api/v2/auth/"
-_LIST_ENDPOINT = "list"
-_CREATE_ENDPOINT = "save"
 
 # Configure logging
 logging.basicConfig(
@@ -28,98 +29,101 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 HTTP_CODE_HANDLING = {
-    "204": "valid",
-    "401": "invalid",
-    "429": "retry",
-    "500": "invalid",
+    200: "valid",
+    201: "valid",
+    204: "valid",
+    401: "invalid",
+    429: "retry",
 }
 
 
-def validate_token(token: str) -> bool:
-    """Check that a token is valid."""
-
-    response = requests.get(
-        _AUTH_TOKEN_ENDPOINT,
-        headers={"Authorization": f"Token {token}"},
+def _get_list(params: dict) -> Response:
+    resp = requests.get(
+        url=f"{BASE_URL}{LIST_ENDPOINT}",
+        params=params,
+        headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
+        verify=False,
     )
-    handling_code = HTTP_CODE_HANDLING[str(response.status_code)]
-    if not handling_code == "valid":
-        secho(f"Invalid token - check your token at {_TOKEN_URL}", fg="bright_red")
-        return False
-    return True
+    return resp
 
 
-def fetch_documents(
-    id: str = None,
-    updated_after: datetime.datetime = None,
-    location: str = None,
-    category: str = None,
-) -> List[dict] | List:
-    """Fetches documents from the Readwise Reader API.
+def _handle_http_status(
+    resp: Response, retry_after_default: int = 5
+) -> Tuple[str, int]:
+    handling_code = HTTP_CODE_HANDLING.get(resp.status_code, "unknown")
+    retry_after = int(resp.headers.get("Retry-After", retry_after_default))
+    return handling_code, retry_after
 
-    Args:
-        id (str, optional): document unique identifier
-        updated_after (datetime, optional): Update after datetime object.
-        location (str, optional): The location to filter documents by.
-        category (str, optional): The category to filter documents by.
 
-    Returns:
-        List[dict] | List: A list of dictionaries containing document information.
-    """
-    full_data = []
+def list_parameter_json(params: ListParameters) -> dict:
+    return params.model_dump(exclude_unset=True, mode="json", by_alias=True)
 
-    params = {
-        "id": id,
-        "updatedAfter": updated_after,
-        "location": location,
-        "category": category,
-    }
+
+def _fetch_results(params: dict, retry_after_default: int = 5) -> list[dict]:
     next_page_cursor = None
-
     while True:
-        if next_page_cursor:
-            params["pageCursor"] = next_page_cursor
+        params["pageCursor"] = next_page_cursor
 
         logger.info("Fetch: %s ...", params)
 
-        response = requests.get(
-            url=f"{_BASE_URL}{_LIST_ENDPOINT}",
-            params=params,
-            headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
-            verify=False,
-        )
+        resp = _get_list(params=params)
 
-        if not response.status_code == 200:
-            handling_code = HTTP_CODE_HANDLING[str(response.status_code)]
+        handling_code, retry_after = _handle_http_status(resp, retry_after_default)
 
-            if handling_code == "retry":
-                retry_after = int(
-                    response.headers.get("Retry-After", 5)
-                )  # Default to 5 seconds if no Retry-After header
-                secho(
-                    f"Too many requests. Retring in {retry_after} seconds...",
-                    fg="bright_yellow",
-                )
-                time.sleep(retry_after)
-                continue
+        if handling_code == "retry":
+            time.sleep(retry_after)
+            secho(
+                f"Too many requests. Retring in {retry_after} seconds...",
+                fg="bright_yellow",
+            )
+        elif handling_code != "valid":
+            secho(f"Unknown response code {resp.status_code}", fg="bright_red")
+            break
 
-            else:
-                secho(f"Unknown response code {response.status_code}", fg="bright_red")
-                break
+        yield resp.json().get("results", [])
 
-        results = response.json().get("results")
-
-        if results:
-            full_data.extend(results)
-
-        next_page_cursor = response.json().get("nextPageCursor")
-
+        next_page_cursor = resp.json().get("nextPageCursor")
         if not next_page_cursor:
             break
 
-    return full_data
+
+def list_documents(
+    id: Optional[str] = None,
+    category: Optional[str] = None,
+    location: Optional[str] = None,
+    updated_after: Optional[datetime] = None,
+) -> List[DocumentInfo]:
+    """Fetches a list of `DocumentInfo` objects.
+
+    Args:
+        id (str, optional): document unique identifier
+        category (str, optional): The category to filter documents by
+        location (str, optional): The location to filter documents by
+        updated_after (datetime, optional): Update after datetime object
+
+    Returns:
+        List[DocumentInfo]: A list of `DocumentInfo` objects
+    """
+
+    params = list_parameter_json(
+        ListParameters(
+            id=id,
+            category=category,
+            location=location,
+            updated_after=updated_after,
+        )
+    )
+
+    return [
+        DocumentInfo(**doc_info)
+        for results in _fetch_results(params=params)
+        for doc_info in results
+    ]
+
+
+def _create_doc():
+    ...
 
 
 def add_document(metadata: dict) -> int:
@@ -130,7 +134,7 @@ def add_document(metadata: dict) -> int:
     """
     while True:
         response = requests.post(
-            url=f"{_BASE_URL}{_CREATE_ENDPOINT}",
+            url=f"{BASE_URL}{CREATE_ENDPOINT}",
             headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
             json=metadata,
         )
@@ -147,7 +151,6 @@ def add_document(metadata: dict) -> int:
                     fg="bright_yellow",
                 )
                 time.sleep(retry_after)
-                continue
 
             else:
                 secho(f"Unknown response code {response.status_code}", fg="bright_red")
@@ -157,3 +160,17 @@ def add_document(metadata: dict) -> int:
             break
 
     return response
+
+
+def validate_token(token: str) -> bool:
+    """Check that a token is valid."""
+
+    response = requests.get(
+        AUTH_TOKEN_URL,
+        headers={"Authorization": f"Token {token}"},
+    )
+    handling_code = HTTP_CODE_HANDLING[response.status_code]
+    if not handling_code == "valid":
+        secho(f"Invalid token - check your token at {TOKEN_URL}", fg="bright_red")
+        return False
+    return True
