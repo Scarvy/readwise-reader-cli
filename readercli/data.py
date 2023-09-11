@@ -3,26 +3,29 @@
 import json
 import os
 from datetime import datetime, timedelta
+from typing import List
 
 from xdg_base_dirs import xdg_data_home
 
 from .api import list_documents
+from .models import DocumentInfo
 
 CACHE_DIR = xdg_data_home() / "reader"
 CACHED_RESULT_PATH = CACHE_DIR / "full_library.json"
 CACHE_EXPIRATION = 1  # Day
 
 
-def fetch_full_library() -> list[dict] | None:
+def fetch_full_library() -> List[DocumentInfo] | None:
     """Fetch the full library including documents, notes, and highlights.
 
     Returns:
-        full_library (list[dict] | None): full library data or None
+        List[Dict[str, int]]: Full list of document information from a user's Reader library
     """
 
     tmp_library = None
 
-    today = datetime.strftime(datetime.now(), format="%Y-%m-%d")
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
 
     if os.path.exists(CACHED_RESULT_PATH):
         with open(CACHED_RESULT_PATH, "r") as f:
@@ -41,22 +44,22 @@ def fetch_full_library() -> list[dict] | None:
         )  # fetch full library including all documents, notes, and highlights
 
         if len(tmp_library) == 0:  # if library is empty
-            return
+            return None
 
         else:  # Cache documents
-            tmp_library = [doc.model_dump(mode="json") for doc in tmp_library]
+            tmp_library_json = [doc.model_dump(mode="json") for doc in tmp_library]
 
-            tmp_library.append({"time": str(datetime.now())})
+            tmp_library_json.append({"time": str(datetime.now())})
             os.makedirs(CACHE_DIR, exist_ok=True)
 
             with open(CACHED_RESULT_PATH, "a+") as f:
                 if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
-                    result_dict = {today: tmp_library}
+                    result_dict = {today: tmp_library_json}
                     f.write(json.dumps(result_dict, indent=4))
                 else:
                     f.seek(0)
                     result_dict = json.load(f)
-                    result_dict[today] = tmp_library
+                    result_dict[today] = tmp_library_json
                     f.truncate(0)
                     f.write(json.dumps(result_dict, indent=4))
 

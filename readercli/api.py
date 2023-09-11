@@ -3,7 +3,7 @@ import logging
 import os
 import time
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Union, Iterable
 
 import dotenv
 import requests
@@ -18,7 +18,7 @@ from .constants import (
     LIST_ENDPOINT,
     TOKEN_URL,
 )
-from .types import DocumentInfo, ListParameters
+from .models import DocumentInfo, ListParameters, CategoryEnum, LocationEnum
 
 urllib3.disable_warnings()
 dotenv.load_dotenv()
@@ -38,15 +38,15 @@ HTTP_CODE_HANDLING = {
 }
 
 
-def list_parameter_jsonify(params: ListParameters) -> dict:
+def list_parameter_jsonify(params: ListParameters) -> Dict[str, Union[str, None]]:
     return params.model_dump(exclude_unset=True, mode="json", by_alias=True)
 
 
-def doc_info_jsonify(doc_info: DocumentInfo) -> dict:
+def doc_info_jsonify(doc_info: DocumentInfo) -> Dict[str, Union[str, None]]:
     return doc_info.model_dump(exclude_unset=True, mode="json")
 
 
-def _get_list(params: dict) -> Response:
+def _get_list(params: Dict[str, Union[str, None]]) -> Response:
     resp = requests.get(
         url=f"{BASE_URL}{LIST_ENDPOINT}",
         params=params,
@@ -56,7 +56,7 @@ def _get_list(params: dict) -> Response:
     return resp
 
 
-def _create_doc(info: dict) -> Response:
+def _create_doc(info: Dict[str, Union[str, None]]) -> Response:
     resp = requests.post(
         url=f"{BASE_URL}{CREATE_ENDPOINT}",
         headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
@@ -73,7 +73,9 @@ def _handle_http_status(
     return handling_code, retry_after
 
 
-def _fetch_results(params: dict, retry_after_default: int = 5) -> list[dict]:
+def _fetch_results(
+    params: Dict[str, Union[str, None]], retry_after_default: int = 5
+) -> Iterable[List[dict]]:
     next_page_cursor = None
     while True:
         params["pageCursor"] = next_page_cursor
@@ -103,8 +105,8 @@ def _fetch_results(params: dict, retry_after_default: int = 5) -> list[dict]:
 
 def list_documents(
     id: Optional[str] = None,
-    category: Optional[str] = None,
-    location: Optional[str] = None,
+    category: Optional[CategoryEnum] = None,
+    location: Optional[LocationEnum] = None,
     updated_after: Optional[datetime] = None,
 ) -> List[DocumentInfo]:
     """Fetches a list of `DocumentInfo` objects.
@@ -124,7 +126,8 @@ def list_documents(
             id=id,
             category=category,
             location=location,
-            updated_after=updated_after,
+            update_after=updated_after,
+            next_page_cursor=None,
         )
     )
 

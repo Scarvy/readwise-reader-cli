@@ -12,7 +12,7 @@ from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
 from .reading_list import build_reading_list
-from .types import DocumentInfo
+from .models import DocumentInfo
 from .utils import (
     batch_add_documents,
     convert_date_range,
@@ -32,13 +32,13 @@ CACHE_EXPIRATION = 1  # Minutes
 @click.option(
     "--location",
     "-l",
-    type=click.Choice(VALID_LOCATION_OPTIONS, case_sensitive=True),
+    type=click.Choice(tuple(VALID_LOCATION_OPTIONS), case_sensitive=True),
     help="Document(s) location",
 )
 @click.option(
     "--category",
     "-c",
-    type=click.Choice(VALID_CATEGORY_OPTIONS, case_sensitive=True),
+    type=click.Choice(tuple(VALID_CATEGORY_OPTIONS), case_sensitive=True),
     help="Document(s) category",
 )
 @click.option(
@@ -155,14 +155,17 @@ def list(
 def lib(view):
     full_data = fetch_full_library()
 
-    if view == "location":
-        stats = count_location_values(full_data)
-    elif view == "tags":
-        stats = count_tag_values(full_data)
-    else:
-        stats = count_category_values(full_data)
+    if full_data:
+        if view == "location":
+            stats = count_location_values(full_data)
+        elif view == "tags":
+            stats = count_tag_values(full_data)
+        else:
+            stats = count_category_values(full_data)
 
-    print_view_results(stats=stats, view=view)
+        print_view_results(stats=stats, view=view)
+    else:
+        raise print("Library is empty.")
 
 
 @click.command(help="Add Document")

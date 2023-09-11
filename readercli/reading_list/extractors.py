@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 import csv
 from typing import List
 
 from bs4 import BeautifulSoup
 
-from ..types import DocumentInfo
+from ..models import DocumentInfo
 
 
 class ReadingListExtractor(ABC):
@@ -65,13 +66,20 @@ class CSVReadingListExtractor(ReadingListExtractor):
             next(reader, None)  # skip header row
 
             for row in reader:
-                url = row[0]
+                url: Any = row[0]
                 title = row[1] if len(row) >= 2 else None
 
                 document = DocumentInfo(title=title, url=url)
                 documents.append(document)
 
         return documents
+
+
+def create_extractor(file_type: str) -> ReadingListExtractor:
+    extractor_map = {"html": HTMLReadingListExtractor, "csv": CSVReadingListExtractor}
+    if file_type not in extractor_map:
+        raise ValueError(f"Invalid file type: {file_type}")
+    return extractor_map[file_type]()
 
 
 def build_reading_list(input_file: str, file_type: str) -> List[DocumentInfo]:
@@ -87,11 +95,6 @@ def build_reading_list(input_file: str, file_type: str) -> List[DocumentInfo]:
     Returns:
         List[DocumentInfo]: A list of `DocumentInfo` objects
     """
-    if file_type == "html":
-        extractor = HTMLReadingListExtractor()
-    elif file_type == "csv":
-        extractor = CSVReadingListExtractor()
-    else:
-        raise ValueError("Invalid file type")
+    extractor = create_extractor(file_type)
 
     return extractor.extract_document_info(input_file)

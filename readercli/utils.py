@@ -1,12 +1,13 @@
 """Utility functions."""
 from datetime import datetime, timedelta
+from typing import List, Dict, Union, Any
 
 from click import secho
 from rich.progress import Progress
 
 from .api import add_document
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
-from .types import DocumentInfo
+from .models import DocumentInfo
 
 DATE_RANGE_MAP = {"today": {"days": 1}, "week": {"weeks": 1}, "month": {"days": 30}}
 
@@ -15,7 +16,9 @@ def convert_date_range(date_range: str) -> datetime:
     return datetime.now() - timedelta(**DATE_RANGE_MAP[date_range])
 
 
-def count_category_values(documents: list[dict]) -> dict:
+def count_category_values(
+    documents: List[Dict[str, Union[str, None]]]
+) -> Dict[str, int]:
     category_counts = {category: 0 for category in VALID_CATEGORY_OPTIONS}
 
     for item in documents:
@@ -26,7 +29,9 @@ def count_category_values(documents: list[dict]) -> dict:
     return category_counts
 
 
-def count_location_values(documents: list[dict]) -> dict:
+def count_location_values(
+    documents: List[Dict[str, Union[str, None]]]
+) -> Dict[str, int]:
     location_counts = {location: 0 for location in VALID_LOCATION_OPTIONS}
 
     for item in documents:
@@ -37,11 +42,11 @@ def count_location_values(documents: list[dict]) -> dict:
     return location_counts
 
 
-def count_tag_values(documents: list[dict]) -> dict:
-    tag_counts = {}
+def count_tag_values(documents: List[DocumentInfo]) -> Dict[str, int]:
+    tag_counts: Dict[str, int] = {}
 
     for item in documents:
-        tags = item.get("tags", {})
+        tags = item.model_dump(include={"tags"})
         if tags:
             for tag_name, _ in tags.items():
                 if tag_name in tag_counts:
@@ -56,18 +61,18 @@ def count_tag_values(documents: list[dict]) -> dict:
     return sorted_tag_counts
 
 
-def print_report(adds, exists, failures, total):
+def print_report(adds: int, exists: int, failures: int, total: int) -> None:
     secho("Report:")
     secho(f"Additions: {adds} out of {total}", fg="bright_green")
     secho(f"Already Exists: {exists}", fg="bright_yellow")
     secho(f"Failures: {failures}", fg="bright_red")
 
 
-def batch_add_documents(documents: list[DocumentInfo]) -> None:
+def batch_add_documents(documents: List[DocumentInfo]) -> None:
     """Batch documents to add to Reader Library.
 
     Args:
-        documents (list[dict]): A list of `DocumentInfo` objects
+        documents (List[]): A list of `DocumentInfo` objects
     """
     number_of_documents = len(documents)
 

@@ -1,6 +1,7 @@
 """Provides code to print layouts to the command-line."""
 
 from datetime import datetime
+from typing import List, Dict, Union
 
 from dateutil import parser, tz
 from rich.align import Align
@@ -43,7 +44,7 @@ def format_reading_progress(reading_progress: float) -> str:
     return percentage_str
 
 
-def format_published_date(timestamp_miliseconds: float) -> datetime:
+def format_published_date(timestamp_miliseconds: float) -> str:
     """Format published date of a document"""
 
     timestamp_seconds = timestamp_miliseconds / 1_000  # Convert microseconds to seconds
@@ -63,7 +64,7 @@ def format_updated_at_date(updated_at: str) -> str:
     return local_time.strftime("%Y-%m-%d")
 
 
-def table_layout(documents, category=""):
+def table_layout(documents: List[Dict], category: str = ""):
     """Displays documents in a table format using rich"""
 
     table = Table(leading=1)
@@ -77,7 +78,7 @@ def table_layout(documents, category=""):
         table.add_column(":clock1: Last Update", justify="right")
 
         for document in documents:
-            category = (
+            ctgry: Union[Text, str] = (
                 emoji_mapping_category[document["category"]]
                 if document["location"]
                 else ":x: category"
@@ -88,10 +89,10 @@ def table_layout(documents, category=""):
             title.stylize(f"#FFE761 link {document['url']}")
 
             if document["tags"]:
-                tags = list(document["tags"].keys())
-                tags = ", ".join([tag for tag in tags])
+                doc_tags: List[str] = list(document["tags"].keys())
+                list_of_tags = ", ".join([tag for tag in doc_tags])
 
-                tags = Text(tags, style="#5278FE")
+                tags: Union[Text, str] = Text(list_of_tags, style="#5278FE")
             else:
                 tags = ":x: tags"
 
@@ -107,7 +108,7 @@ def table_layout(documents, category=""):
 
             table.add_row(
                 title,
-                category,
+                ctgry,
                 content,
                 tags,
                 location,
@@ -135,12 +136,12 @@ def table_layout(documents, category=""):
                 if document["author"]
                 else Text("no author", style="italic #EF476F")
             )
-            category = (
+            ctgry = (
                 emoji_mapping_category[document["category"]]
                 if document["category"]
                 else Text("no category", style="italic")
             )
-            summary = (
+            summary: Union[Text, str] = (
                 Text(document["summary"], style="#e4938e")
                 if document["summary"]
                 else ":x: no summary"
@@ -159,10 +160,10 @@ def table_layout(documents, category=""):
             title.stylize(f"#FFE761 link {document['url']}")
 
             if document["tags"]:
-                tags = list(document["tags"].keys())
-                tags = ", ".join([tag for tag in tags])
+                doc_tags = list(document["tags"].keys())
+                list_of_tags = ", ".join([tag for tag in doc_tags])
 
-                tags = Text(tags, style="#5278FE")
+                tags = Text(list_of_tags, style="#5278FE")
             else:
                 tags = ":x: tags"
 
@@ -179,7 +180,7 @@ def table_layout(documents, category=""):
             table.add_row(
                 title,
                 author,
-                category,
+                ctgry,
                 summary,
                 tags,
                 location,
@@ -190,7 +191,7 @@ def table_layout(documents, category=""):
     console.print(table)
 
 
-def list_layout(documents, category=None):
+def list_layout(documents: List[Dict], category: str = ""):
     """Display documents in a list layout using rich"""
 
     width = 88
@@ -252,7 +253,7 @@ def list_layout(documents, category=None):
     console.print(column(Rule(style="#FFE761")))
 
 
-def print_view_results(stats: dict, view: str = ""):
+def print_view_results(stats: Dict, view: str = ""):
     if not view == "tags":
         emojis = emoji_mapping[view]
 
@@ -275,7 +276,9 @@ def print_view_results(stats: dict, view: str = ""):
     console.print(table)
 
 
-def print_results(docuemnts, page=False, layout="", category=""):
+def print_results(
+    docuemnts: List[Dict], page=False, layout: str = "", category: str = ""
+) -> None:
     """Use a layout to print or page the fetched documents"""
     if page:
         with console.pager(styles=True):
@@ -284,7 +287,7 @@ def print_results(docuemnts, page=False, layout="", category=""):
     print_layout(docuemnts, layout=layout, category=category)
 
 
-def print_layout(documents, category="", layout="table"):
+def print_layout(documents: List[Dict], category: str = "", layout: str = "table"):
     """Use listed layout"""
     if layout == "list":
         list_layout(documents, category=category)
