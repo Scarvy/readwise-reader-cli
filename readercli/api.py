@@ -11,14 +11,14 @@ import urllib3
 from click import secho
 from requests import Response
 
-from readercli.constants import (
+from .constants import (
     AUTH_TOKEN_URL,
     BASE_URL,
     CREATE_ENDPOINT,
     LIST_ENDPOINT,
     TOKEN_URL,
 )
-from readercli.document import DocumentInfo, ListParameters
+from .types import DocumentInfo, ListParameters
 
 urllib3.disable_warnings()
 dotenv.load_dotenv()
@@ -38,6 +38,14 @@ HTTP_CODE_HANDLING = {
 }
 
 
+def list_parameter_jsonify(params: ListParameters) -> dict:
+    return params.model_dump(exclude_unset=True, mode="json", by_alias=True)
+
+
+def doc_info_jsonify(doc_info: DocumentInfo) -> dict:
+    return doc_info.model_dump(exclude_unset=True, mode="json")
+
+
 def _get_list(params: dict) -> Response:
     resp = requests.get(
         url=f"{BASE_URL}{LIST_ENDPOINT}",
@@ -48,16 +56,21 @@ def _get_list(params: dict) -> Response:
     return resp
 
 
+def _create_doc(info: dict) -> Response:
+    resp = requests.post(
+        url=f"{BASE_URL}{CREATE_ENDPOINT}",
+        headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
+        json=info,
+    )
+    return resp
+
+
 def _handle_http_status(
     resp: Response, retry_after_default: int = 5
 ) -> Tuple[str, int]:
     handling_code = HTTP_CODE_HANDLING.get(resp.status_code, "unknown")
     retry_after = int(resp.headers.get("Retry-After", retry_after_default))
     return handling_code, retry_after
-
-
-def list_parameter_json(params: ListParameters) -> dict:
-    return params.model_dump(exclude_unset=True, mode="json", by_alias=True)
 
 
 def _fetch_results(params: dict, retry_after_default: int = 5) -> list[dict]:
@@ -106,7 +119,7 @@ def list_documents(
         List[DocumentInfo]: A list of `DocumentInfo` objects
     """
 
-    params = list_parameter_json(
+    params = list_parameter_jsonify(
         ListParameters(
             id=id,
             category=category,
@@ -122,44 +135,34 @@ def list_documents(
     ]
 
 
-def _create_doc():
-    ...
-
-
-def add_document(metadata: dict) -> int:
+def add_document(doc_info: DocumentInfo) -> Response:
     """Adds a document to a users Reader account.
 
     Args:
-        metadata (dict): Metadata about a specific document to be added.
+        doc_info (dict): `DocumentInfo` object
     """
+
+    doc_info_json = doc_info_jsonify(doc_info=doc_info)
+
     while True:
-        response = requests.post(
-            url=f"{BASE_URL}{CREATE_ENDPOINT}",
-            headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
-            json=metadata,
-        )
+        resp = _create_doc(info=doc_info_json)
 
-        if not response.status_code in (201, 200):
-            handling_code = HTTP_CODE_HANDLING[str(response.status_code)]
+        handling_code, retry_after = _handle_http_status(resp=resp)
 
-            if handling_code == "retry":
-                retry_after = int(
-                    response.headers.get("Retry-After", 5)
-                )  # Default to 5 seconds if no Retry-After header
-                secho(
-                    f"Too many requests. Retring in {retry_after} seconds...",
-                    fg="bright_yellow",
-                )
-                time.sleep(retry_after)
-
-            else:
-                secho(f"Unknown response code {response.status_code}", fg="bright_red")
-                break
-
-        else:
+        if handling_code == "retry":
+            time.sleep(retry_after)
+            secho(
+                f"Too many requests. Retring in {retry_after} seconds...",
+                fg="bright_yellow",
+            )
+        elif handling_code != "valid":
+            secho(f"Unknown response code {resp.status_code}", fg="bright_red")
             break
 
-    return response
+        else:  # If code 200 or 201, break loop
+            break
+
+    return resp
 
 
 def validate_token(token: str) -> bool:

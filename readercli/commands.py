@@ -12,6 +12,7 @@ from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
 from .reading_list import build_reading_list
+from .types import DocumentInfo
 from .utils import (
     batch_add_documents,
     convert_date_range,
@@ -167,8 +168,7 @@ def lib(view):
 @click.command(help="Add Document")
 @click.argument("url")
 def add(url):
-    data = {"url": url}  # plan to add more option like title, tags etc.
-    response = add_document(data=data)
+    response = add_document(doc_info=DocumentInfo(url=url))
     if response.status_code == 200:
         secho(f"Already Exists.", fg="yellow")
     else:

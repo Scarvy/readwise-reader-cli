@@ -43,19 +43,22 @@ def fetch_full_library() -> list[dict] | None:
         if len(tmp_library) == 0:  # if library is empty
             return
 
-        tmp_library.append({"time": str(datetime.now())})
-        os.makedirs(CACHE_DIR, exist_ok=True)
+        else:  # Cache documents
+            tmp_library = [doc.model_dump(mode="json") for doc in tmp_library]
 
-        with open(CACHED_RESULT_PATH, "a+") as f:
-            if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
-                result_dict = {today: tmp_library}
-                f.write(json.dumps(result_dict, indent=4))
-            else:
-                f.seek(0)
-                result_dict = json.load(f)
-                result_dict[today] = tmp_library
-                f.truncate(0)
-                f.write(json.dumps(result_dict, indent=4))
+            tmp_library.append({"time": str(datetime.now())})
+            os.makedirs(CACHE_DIR, exist_ok=True)
+
+            with open(CACHED_RESULT_PATH, "a+") as f:
+                if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
+                    result_dict = {today: tmp_library}
+                    f.write(json.dumps(result_dict, indent=4))
+                else:
+                    f.seek(0)
+                    result_dict = json.load(f)
+                    result_dict[today] = tmp_library
+                    f.truncate(0)
+                    f.write(json.dumps(result_dict, indent=4))
 
     full_library = tmp_library[:-1]
 

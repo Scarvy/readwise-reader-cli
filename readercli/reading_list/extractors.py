@@ -5,7 +5,7 @@ from typing import List
 
 from bs4 import BeautifulSoup
 
-from ..document import DocumentInfo
+from ..types import DocumentInfo
 
 
 class ReadingListExtractor(ABC):

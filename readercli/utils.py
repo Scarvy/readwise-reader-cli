@@ -6,7 +6,7 @@ from rich.progress import Progress
 
 from .api import add_document
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
-from .document import DocumentInfo
+from .types import DocumentInfo
 
 DATE_RANGE_MAP = {"today": {"days": 1}, "week": {"weeks": 1}, "month": {"days": 30}}
 
@@ -80,8 +80,7 @@ def batch_add_documents(documents: list[DocumentInfo]) -> None:
         task = progress.add_task("Uploading...", total=number_of_documents)
 
         for document in documents:
-            metadata = document.model_dump(exclude_unset=True, mode="json")
-            response = add_document(metadata=metadata)
+            response = add_document(doc_info=document)
 
             if response.status_code == 201:
                 adds += 1
