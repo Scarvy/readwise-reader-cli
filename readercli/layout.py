@@ -44,14 +44,20 @@ def format_reading_progress(reading_progress: float) -> str:
     return percentage_str
 
 
-def format_published_date(timestamp_miliseconds: float) -> str:
+def format_published_date(timestamp_miliseconds: Union[float, str]) -> str:
     """Format published date of a document"""
 
-    timestamp_seconds = timestamp_miliseconds / 1_000  # Convert microseconds to seconds
+    if isinstance(timestamp_miliseconds, float):
+        timestamp_seconds = (
+            timestamp_miliseconds / 1_000
+        )  # Convert microseconds to seconds
 
-    datetime_obj = datetime.fromtimestamp(timestamp_seconds, tz=tz.tzlocal())
+        datetime_obj = datetime.fromtimestamp(timestamp_seconds, tz=tz.tzlocal())
 
-    return datetime_obj.strftime("%Y-%m-%d")
+        return datetime_obj.strftime("%Y-%m-%d")
+
+    elif isinstance(timestamp_miliseconds, str):
+        return timestamp_miliseconds[:9]
 
 
 def format_updated_at_date(updated_at: str) -> str:
@@ -231,13 +237,12 @@ def list_layout(documents: List[Dict], category: str = ""):
         yield summary_table
         yield ""
         # tags
-        tags = list(document["tags"].keys())
-        tags = ", ".join([tag for tag in tags])
-
-        if tags:
-            yield Text(tags, style="#5278FE")
+        if document["tags"]:
+            doc_tags = list(document["tags"].keys())
+            list_of_tags = ", ".join([tag for tag in doc_tags])
+            yield Text(list_of_tags, style="#5278FE")
         else:
-            yield Text("No tags", style="italic")
+            yield ":x: No tags"
         yield ""
 
     def column(renderable):
