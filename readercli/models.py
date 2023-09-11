@@ -40,7 +40,7 @@ class TagInfo(BaseModel):
 
 class ListParameters(BaseModel):
     id: Optional[str] = None
-    update_after: Optional[str] = Field(None, serialization_alias="updatedAfter")
+    update_after: Optional[datetime] = Field(None, serialization_alias="updatedAfter")
     category: Optional[CategoryEnum] = None
     location: Optional[LocationEnum] = None
     next_page_cursor: Optional[str] = Field(None, serialization_alias="pageCursor")
