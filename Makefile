@@ -4,7 +4,7 @@ test:
 	pytest
 
 clean: clean-dist
-	rm -rf .pytest_cache ./**/__pycache__
+	rm -rf .pytest_cache .mypy_cache ./**/__pycache__
 
 clean-dist:
 	rm -rf dist readwise_reader_cli.egg-info
