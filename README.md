@@ -2,7 +2,7 @@
 
 This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add` and `list` documents from your Reader library.
 
-Also, You can even `upload` documents from your browser reading list, such as Chrome ReadingList.
+Also, you can `upload` documents from your browser reading list, such as Chrome ReadingList.
 
 Please note that future updates will include support for additional browsers.
 
