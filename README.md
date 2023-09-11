@@ -33,9 +33,11 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  add     Add Document
-  list    List Documents
-  upload  Upload Reading List File
+  add       Add Document
+  lib       Library breakdown
+  list      List Documents
+  upload    Upload Reading List File
+  validate  Validate token
 ```
 
 ### List Documents
@@ -46,17 +48,23 @@ Usage: python -m readercli list [OPTIONS]
   List Documents
 
 Options:
-  -l, --location [later|feed|new|archive]
-                                  Document(s) location  [default: archive]
-  -c, --category [pdf|highlight|epub|rss|tweet|video|email|note|article]
+  -l, --location [new|archive|later|feed]
+                                  Document(s) location
+  -c, --category [article|tweet|pdf|epub|email|note|video|highlight|rss]
                                   Document(s) category
   -a, --update-after [%Y-%m-%d|%Y-%m-%dT%H:%M:%S|%Y-%m-%d %H:%M:%S]
-                                  Updated after date in ISO format.
-  -L, --layout [list|table]       Display documents either as a list or table
+                                  Updated after date in ISO format. Default:
+                                  last 24hrs.
+  -d, --date-range TEXT           View documents updated after choosen time:
+                                  day, week, month.
+  -L, --layout [table|list]       Display documents either as a list or table.
+                                  Default: table.
+  -n, --num-results INTEGER       The number of documents to show.
+  -P, --pager                     Use to page output.
   --help                          Show this message and exit.
 ```
 
-Example:
+Examples:
 
 ```bash
 python -m readercli list --location archive
@@ -122,10 +130,80 @@ Options:
   --help  Show this message and exit.
 ```
 
-Examples:
+Example:
 
 ```bash
 python -m readercli add http://www.example.com
+```
+
+### Library Overview
+
+```bash
+Usage: python -m readercli lib [OPTIONS]
+
+  Library breakdown
+
+Options:
+  -V, --view [category|location|tags]
+  --help                          Show this message and exit.
+```
+
+```bash
+python -m readercli lib
+
+  Category Breakdown
+┏━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Name        ┃ Count ┃
+┡━━━━━━━━━━━━━╇━━━━━━━┩
+│ 🖍️ highlight│   724 │
+│ 📡️ rss      │   391 │
+│ ✉️ email     │   363 │
+│ 📰️ article  │   264 │
+│ 📝️ note     │   140 │
+│ 📄️ pdf      │    83 │
+│ 🐦️ tweet    │    25 │
+│ 📹️ video    │    10 │
+│ 📖️ epub     │     0 │
+└─────────────┴───────┘
+
+python -m readercli lib --view [location | tags]
+
+ Location Breakdown
+┏━━━━━━━━━━━┳━━━━━━━┓
+┃ Name      ┃ Count ┃
+┡━━━━━━━━━━━╇━━━━━━━┩
+│ 🗄️ archive│  1124 │
+│ 🕑️ later  │   241 │
+│ ⭐️ new    │    10 │
+│ 📥️ feed   │     2 │
+└───────────┴───────┘
+
+python -m readercli lib --view tags
+
+Tags Breakdown
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
+┃ Name                   ┃ Count ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━┩
+│ python                 │    32 │
+│ documentation          │     9 │
+│ programming            │     7 │
+│ github                 │     7 │
+│ git                    │     6 │
+│ packages               │     6 │
+│ design-patterns        │     6 │
+│ mac                    │     1 │
+└────────────────────────┴───────┘
+```
+
+### Validate Token
+
+```bash
+Usage: python -m readercli validate [OPTIONS] TOKEN
+
+  Validate token
+
+Options:
+  --help  Show this message and exit.
 ```
 
 ## License
