@@ -4,6 +4,7 @@ from unittest import mock
 from readercli.api import validate_token, _get_list, _create_doc
 
 
+# source https://stackoverflow.com/questions/15753390/how-can-i-mock-requests-and-the-response
 def mock_request_get(**kwargs):
     class MockGetResponse:
         def __init__(self, count, next_page_cursor, json_data):
