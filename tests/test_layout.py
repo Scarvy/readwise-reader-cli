@@ -12,7 +12,7 @@ def test_format_reading_progress(progress, expected):
 
 @pytest.mark.parametrize(
     "timestamp_milliseconds, expected",
-    [(1690416000000, "2023-07-26")],
+    [(1690416000000.0, "2023-07-26")],
 )
 def test_format_published_date(timestamp_milliseconds, expected):
     assert format_published_date(timestamp_milliseconds) == expected
