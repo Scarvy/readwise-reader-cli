@@ -68,7 +68,7 @@ def print_report(adds: int, exists: int, failures: int, total: int) -> None:
     secho(f"Failures: {failures}", fg="bright_red")
 
 
-def batch_add_documents(documents: List[DocumentInfo]) -> None:
+def batch_add_documents(documents: List[DocumentInfo], debug=False) -> None:
     """Batch documents to add to Reader Library.
 
     Args:
@@ -85,7 +85,7 @@ def batch_add_documents(documents: List[DocumentInfo]) -> None:
         task = progress.add_task("Uploading...", total=number_of_documents)
 
         for document in documents:
-            response = add_document(doc_info=document)
+            response = add_document(doc_info=document, debug=debug)
 
             if response.status_code == 201:
                 adds += 1

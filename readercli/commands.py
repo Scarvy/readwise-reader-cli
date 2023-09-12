@@ -67,6 +67,7 @@ CACHE_EXPIRATION = 1  # Minutes
     help="The number of documents to show.",
 )
 @click.option("--pager", "-P", is_flag=True, default=False, help="Use to page output.")
+@click.option("--debug", is_flag=True, default=False, hidden=True)
 @click.option(  # Don't hit Reader API
     "--no-api",
     is_flag=True,
@@ -81,6 +82,7 @@ def list(
     layout,
     num_results,
     pager=False,
+    debug=False,
     no_api=False,
 ):
     if date_range:
@@ -104,7 +106,8 @@ def list(
                 time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
                 diff = datetime.now() - time
                 if diff < timedelta(minutes=CACHE_EXPIRATION):
-                    print("Using cache instead.")
+                    if debug:
+                        print("Using cache")
                     tmp_docs = result
 
     if not tmp_docs:  # If cache expired or results not yet cached
@@ -112,7 +115,10 @@ def list(
             return
 
         tmp_docs = list_documents(
-            category=category, location=location, updated_after=update_after
+            category=category,
+            location=location,
+            updated_after=update_after,
+            debug=debug,
         )
 
         if len(tmp_docs) == 0:  # if list of documents is empty
@@ -170,8 +176,9 @@ def lib(view):
 
 @click.command(help="Add Document")
 @click.argument("url")
-def add(url):
-    response = add_document(doc_info=DocumentInfo(url=url))
+@click.option("--debug", is_flag=True, default=False, hidden=True)
+def add(url, debug=False):
+    response = add_document(doc_info=DocumentInfo(url=url), debug=debug)
     if response.status_code == 200:
         secho(f"Already Exists.", fg="yellow")
     else:
@@ -181,17 +188,19 @@ def add(url):
 @click.command(help="Upload Reading List File")
 @click.argument("input_file", type=click.Path(exists=True))
 @click.option("--file-type", type=click.Choice(["html", "csv"]), default="html")
-def upload(input_file, file_type):
+@click.option("--debug", is_flag=True, default=False, hidden=True)
+def upload(input_file, file_type, debug=False):
     click.echo(f"Adding Document(s) from: {input_file}")
 
     reading_list = build_reading_list(input_file=input_file, file_type=file_type)
 
-    batch_add_documents(reading_list)
+    batch_add_documents(reading_list, debug=debug)
 
 
 @click.command(help="Validate token")
 @click.argument("token", type=str)
-def validate(token):
-    is_valid = validate_token(token)
+@click.option("--debug", is_flag=True, default=False, hidden=True)
+def validate(token, debug=False):
+    is_valid = validate_token(token=token, debug=debug)
     if is_valid:
         secho("Token is valid", fg="bright_green")
