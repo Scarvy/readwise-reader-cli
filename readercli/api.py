@@ -131,16 +131,17 @@ def _fetch_results(
 
         handling_code, retry_after = _handle_http_status(resp, retry_after_default)
 
-        if handling_code == "retry":
-            time.sleep(retry_after)
-            msg = STATUS_ACTIONS[handling_code]
-            secho(msg.format(retry_after), fg="bright_yellow")
-        elif handling_code in STATUS_ACTIONS:
-            msg = STATUS_ACTIONS[handling_code]
-            secho(msg, fg="bright_red")
-            break
-        else:
-            break
+        if not handling_code == "valid":
+            if handling_code == "retry":
+                time.sleep(retry_after)
+                msg = STATUS_ACTIONS[handling_code]
+                secho(msg.format(retry_after), fg="bright_yellow")
+            elif handling_code in STATUS_ACTIONS:
+                msg = STATUS_ACTIONS[handling_code]
+                secho(msg, fg="yellow")
+                break
+            else:
+                break
 
         yield resp.json().get("results", [])
 
@@ -201,16 +202,17 @@ def add_document(doc_info: DocumentInfo, debug: bool = False) -> Response:
 
         handling_code, retry_after = _handle_http_status(resp=resp)
 
-        if handling_code == "retry":
-            time.sleep(retry_after)
-            msg = STATUS_ACTIONS[handling_code]
-            secho(msg.format(retry_after), fg="bright_yellow")
-        elif handling_code in STATUS_ACTIONS:
-            msg = STATUS_ACTIONS[handling_code]
-            secho(msg, fg="bright_red")
-            break
-        else:
-            break
+        if not handling_code == "valid":
+            if handling_code == "retry":
+                time.sleep(retry_after)
+                msg = STATUS_ACTIONS[handling_code]
+                secho(msg.format(retry_after), fg="bright_yellow")
+            elif handling_code in STATUS_ACTIONS:
+                msg = STATUS_ACTIONS[handling_code]
+                secho(msg, fg="bright_red")
+                break
+            else:
+                break
 
     return resp
 
