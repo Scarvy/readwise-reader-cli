@@ -1,5 +1,7 @@
 # Reader API Command-Line Interface
 
+![](./images/reader_app_icon.PNG)
+
 This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add` and `list` documents from your Reader library.
 
 Also, you can `upload` documents from your browser reading list, such as Chrome ReadingList.
@@ -81,6 +83,12 @@ python -m readercli list --location archive --category article --update-after 20
 ```bash
 python -m readercli list --location archive --category article --update-after 2023-01-01 --layout list
 ```
+
+### Layouts
+
+![table](./images/table.png)
+
+![list_table](./images/list.png)
 
 ### Upload a Reading List (Google Chrome support only)
 
