@@ -207,13 +207,12 @@ def add_document(doc_info: DocumentInfo, debug: bool = False) -> Response:
                 time.sleep(retry_after)
                 msg = STATUS_ACTIONS[handling_code]
                 secho(msg.format(retry_after), fg="bright_yellow")
-            elif handling_code in STATUS_ACTIONS:
+            else:
                 msg = STATUS_ACTIONS[handling_code]
                 secho(msg, fg="bright_red")
                 break
-            else:
-                break
-
+        else:
+            break
     return resp
 
 
