@@ -3,7 +3,7 @@
 import json
 import os
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
 
 from xdg_base_dirs import xdg_data_home
 
@@ -15,32 +15,52 @@ CACHED_RESULT_PATH = CACHE_DIR / "full_library.json"
 CACHE_EXPIRATION = 1  # Day
 
 
-def fetch_full_library() -> List[DocumentInfo] | None:
+def todays_date():
+    now = datetime.now()
+    return now.strftime("%Y-%m-%d")
+
+
+def load_library(date: str) -> List[dict]:
+    with open(CACHED_RESULT_PATH, "r") as f:
+        json_file = json.load(f)
+        return json_file.get(date)
+
+
+def get_cache_time(cache: list[dict]) -> str:
+    t = cache[-1].get("time")
+    return datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
+
+
+def use_cache(t: datetime) -> bool:
+    diff = datetime.now() - t
+    if diff < timedelta(days=CACHE_EXPIRATION):
+        return True
+    return False
+
+
+def fetch_full_library(debug=False) -> Optional[List[DocumentInfo]]:
     """Fetch the full library including documents, notes, and highlights.
 
     Returns:
-        List[Dict[str, int]]: Full list of document information from a user's Reader library
+        List[DocumentInfo]: A list of `DocumentInfo` objects.
     """
 
     tmp_library = None
 
-    now = datetime.now()
-    today = now.strftime("%Y-%m-%d")
+    today = todays_date()
 
     if os.path.exists(CACHED_RESULT_PATH):
-        with open(CACHED_RESULT_PATH, "r") as f:
-            json_file = json.load(f)
-            result = json_file.get(today)
-            if result:
-                t = result[-1].get("time")
-                time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
-                diff = datetime.now() - time
-                if diff < timedelta(days=CACHE_EXPIRATION):
-                    tmp_library = result
+        result = load_library(date=today)
+        if result:
+            time = get_cache_time(cache=result)
+            if use_cache(t=time):
+                if debug:
+                    print("Using cache")
+                tmp_library = result
 
     if not tmp_library:
-        tmp_library = (
-            list_documents()
+        tmp_library = list_documents(
+            debug=debug
         )  # fetch full library including all documents, notes, and highlights
 
         if len(tmp_library) == 0:  # if library is empty
@@ -63,6 +83,6 @@ def fetch_full_library() -> List[DocumentInfo] | None:
                     f.truncate(0)
                     f.write(json.dumps(result_dict, indent=4))
 
-    full_library = tmp_library[:-1]
+    full_library = [DocumentInfo(**doc_info) for doc_info in tmp_library[:-1]]
 
     return full_library

@@ -158,8 +158,9 @@ def list(
     default="category",
     type=click.Choice(["category", "location", "tags"], case_sensitive=True),
 )
-def lib(view):
-    full_data = fetch_full_library()
+@click.option("--debug", is_flag=True, default=False, hidden=True)
+def lib(view, debug=False):
+    full_data = fetch_full_library(debug=debug)
 
     if full_data:
         if view == "location":
@@ -171,7 +172,7 @@ def lib(view):
 
         print_view_results(stats=stats, view=view)
     else:
-        raise print("Library is empty.")
+        print("Library is empty.")
 
 
 @click.command(help="Add Document")

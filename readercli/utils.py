@@ -16,28 +16,28 @@ def convert_date_range(date_range: str) -> datetime:
     return datetime.now() - timedelta(**DATE_RANGE_MAP[date_range])
 
 
-def count_category_values(
-    documents: List[Dict[str, Union[str, None]]]
-) -> Dict[str, int]:
+def count_category_values(documents: List[DocumentInfo]) -> Dict[str, int]:
     category_counts = {category: 0 for category in VALID_CATEGORY_OPTIONS}
 
-    for item in documents:
-        category = item.get("category")
-        if category in category_counts:
-            category_counts[category] += 1
+    for doc in documents:
+        doc_ctgry = doc.model_dump(include={"category"})
+        category = doc_ctgry.get("category")
+        if category:
+            if category in category_counts:
+                category_counts[category] += 1
 
     return category_counts
 
 
-def count_location_values(
-    documents: List[Dict[str, Union[str, None]]]
-) -> Dict[str, int]:
+def count_location_values(documents: List[DocumentInfo]) -> Dict[str, int]:
     location_counts = {location: 0 for location in VALID_LOCATION_OPTIONS}
 
-    for item in documents:
-        location = item.get("location")
-        if location in location_counts:
-            location_counts[location] += 1
+    for document in documents:
+        document_loc = document.model_dump(include={"location"})
+        location = document_loc.get("location")
+        if location:
+            if location in location_counts:
+                location_counts[location] += 1
 
     return location_counts
 
@@ -45,8 +45,9 @@ def count_location_values(
 def count_tag_values(documents: List[DocumentInfo]) -> Dict[str, int]:
     tag_counts: Dict[str, int] = {}
 
-    for item in documents:
-        tags = item.model_dump(include={"tags"})
+    for doc in documents:
+        doc_tags = doc.model_dump(include=["tags"])
+        tags = doc_tags.get("tags")
         if tags:
             for tag_name, _ in tags.items():
                 if tag_name in tag_counts:
@@ -72,7 +73,7 @@ def batch_add_documents(documents: List[DocumentInfo], debug=False) -> None:
     """Batch documents to add to Reader Library.
 
     Args:
-        documents (List[]): A list of `DocumentInfo` objects
+        documents (List[DocumentInfo]): A list of `DocumentInfo` objects
     """
     number_of_documents = len(documents)
 
