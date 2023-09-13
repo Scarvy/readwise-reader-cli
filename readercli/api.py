@@ -24,11 +24,19 @@ from .models import DocumentInfo, ListParameters, CategoryEnum, LocationEnum
 urllib3.disable_warnings()
 dotenv.load_dotenv()
 
+STATUS_ACTIONS = {
+    "invalid_params": "Invalid request. Modify request before sending again.",
+    "invalid_token": f"Invalid token - check your token at {TOKEN_URL}",
+    "retry": "Too many requests. Retring in {} seconds...",
+    "unknown": "Unkown request error.",
+}
+
 HTTP_CODE_HANDLING = {
     200: "valid",
     201: "valid",
-    204: "valid",
-    401: "invalid",
+    204: "valid_token",
+    400: "invalid_params",
+    401: "invalid_token",
     429: "retry",
 }
 
@@ -114,7 +122,7 @@ def _handle_http_status(
 
 def _fetch_results(
     params: Dict[str, Union[str, None]], retry_after_default: int = 5
-) -> Iterable[List[dict]]:
+) -> Optional[Iterable[List[dict]]]:
     next_page_cursor = None
     while True:
         params["pageCursor"] = next_page_cursor
@@ -125,12 +133,13 @@ def _fetch_results(
 
         if handling_code == "retry":
             time.sleep(retry_after)
-            secho(
-                f"Too many requests. Retring in {retry_after} seconds...",
-                fg="bright_yellow",
-            )
-        elif handling_code != "valid":
-            secho(f"Unknown response code {resp.status_code}", fg="bright_red")
+            msg = STATUS_ACTIONS[handling_code]
+            secho(msg.format(retry_after), fg="bright_yellow")
+        elif handling_code in STATUS_ACTIONS:
+            msg = STATUS_ACTIONS[handling_code]
+            secho(msg, fg="bright_red")
+            break
+        else:
             break
 
         yield resp.json().get("results", [])
@@ -194,15 +203,13 @@ def add_document(doc_info: DocumentInfo, debug: bool = False) -> Response:
 
         if handling_code == "retry":
             time.sleep(retry_after)
-            secho(
-                f"Too many requests. Retring in {retry_after} seconds...",
-                fg="bright_yellow",
-            )
-        elif handling_code != "valid":
-            secho(f"Unknown response code {resp.status_code}", fg="bright_red")
+            msg = STATUS_ACTIONS[handling_code]
+            secho(msg.format(retry_after), fg="bright_yellow")
+        elif handling_code in STATUS_ACTIONS:
+            msg = STATUS_ACTIONS[handling_code]
+            secho(msg, fg="bright_red")
             break
-
-        else:  # If code 200 or 201, break loop
+        else:
             break
 
     return resp
@@ -217,7 +224,8 @@ def validate_token(token: str, debug: bool = False) -> bool:
         headers={"Authorization": f"Token {token}"},
     )
     handling_code = HTTP_CODE_HANDLING[response.status_code]
-    if not handling_code == "valid":
-        secho(f"Invalid token - check your token at {TOKEN_URL}", fg="bright_red")
+    if not handling_code == "valid_token":
+        invalid_token_msg = STATUS_ACTIONS[handling_code]
+        secho(invalid_token_msg, fg="bright_red")
         return False
     return True
