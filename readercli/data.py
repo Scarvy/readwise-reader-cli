@@ -56,7 +56,7 @@ def fetch_full_library(debug=False) -> Optional[List[DocumentInfo]]:
             if use_cache(t=time):
                 if debug:
                     print("Using cache")
-                tmp_library = result
+                tmp_library = [DocumentInfo(**doc_info) for doc_info in result[:-1]]
 
     if not tmp_library:
         tmp_library = list_documents(
@@ -83,6 +83,6 @@ def fetch_full_library(debug=False) -> Optional[List[DocumentInfo]]:
                     f.truncate(0)
                     f.write(json.dumps(result_dict, indent=4))
 
-    full_library = [DocumentInfo(**doc_info) for doc_info in tmp_library[:-1]]
+    full_library = tmp_library
 
     return full_library
