@@ -1,7 +1,7 @@
 """Provides code to print layouts to the command-line."""
 
 from datetime import datetime
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from dateutil import parser, tz
 from rich.align import Align

@@ -26,9 +26,11 @@ def load_library(date: str) -> List[dict]:
         return json_file.get(date)
 
 
-def get_cache_time(cache: list[dict]) -> str:
+def get_cache_time(cache: list[dict]) -> datetime | None:
     t = cache[-1].get("time")
-    return datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
+    if t:
+        return datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f")
+    return t
 
 
 def use_cache(t: datetime) -> bool:
@@ -45,7 +47,7 @@ def fetch_full_library(debug=False) -> Optional[List[DocumentInfo]]:
         List[DocumentInfo]: A list of `DocumentInfo` objects.
     """
 
-    tmp_library = None
+    tmp_library: Optional[List[DocumentInfo]] = None
 
     today = todays_date()
 
@@ -53,35 +55,36 @@ def fetch_full_library(debug=False) -> Optional[List[DocumentInfo]]:
         result = load_library(date=today)
         if result:
             time = get_cache_time(cache=result)
+            if not time:
+                raise ValueError(time)
             if use_cache(t=time):
                 if debug:
                     print("Using cache")
                 tmp_library = [DocumentInfo(**doc_info) for doc_info in result[:-1]]
 
-    if not tmp_library:
+    if tmp_library is None:
         tmp_library = list_documents(
             debug=debug
         )  # fetch full library including all documents, notes, and highlights
 
-        if len(tmp_library) == 0:  # if library is empty
-            return None
-
-        else:  # Cache documents
+        if tmp_library is None or len(tmp_library) == 0:
+            return tmp_library
+        else:
             tmp_library_json = [doc.model_dump(mode="json") for doc in tmp_library]
 
             tmp_library_json.append({"time": str(datetime.now())})
             os.makedirs(CACHE_DIR, exist_ok=True)
 
-            with open(CACHED_RESULT_PATH, "a+") as f:
-                if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
-                    result_dict = {today: tmp_library_json}
-                    f.write(json.dumps(result_dict, indent=4))
-                else:
-                    f.seek(0)
-                    result_dict = json.load(f)
-                    result_dict[today] = tmp_library_json
-                    f.truncate(0)
-                    f.write(json.dumps(result_dict, indent=4))
+        with open(CACHED_RESULT_PATH, "a+") as f:
+            if os.path.getsize(CACHED_RESULT_PATH) == 0:  # file is empty
+                result_dict = {today: tmp_library_json}
+                f.write(json.dumps(result_dict, indent=4))
+            else:
+                f.seek(0)
+                result_dict = json.load(f)
+                result_dict[today] = tmp_library_json
+                f.truncate(0)
+                f.write(json.dumps(result_dict, indent=4))
 
     full_library = tmp_library
 

@@ -1,6 +1,6 @@
 """Utility functions."""
 from datetime import datetime, timedelta
-from typing import List, Dict, Union, Any
+from typing import Dict, List
 
 from click import secho
 from rich.progress import Progress
@@ -46,7 +46,7 @@ def count_tag_values(documents: List[DocumentInfo]) -> Dict[str, int]:
     tag_counts: Dict[str, int] = {}
 
     for doc in documents:
-        doc_tags = doc.model_dump(include=["tags"])
+        doc_tags = doc.model_dump(include={"tags"})
         tags = doc_tags.get("tags")
         if tags:
             for tag_name, _ in tags.items():

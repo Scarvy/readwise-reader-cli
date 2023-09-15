@@ -11,8 +11,8 @@ from .api import add_document, list_documents, validate_token
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
-from .reading_list import build_reading_list
 from .models import DocumentInfo
+from .reading_list import build_reading_list
 from .utils import (
     batch_add_documents,
     convert_date_range,
@@ -181,9 +181,9 @@ def lib(view, debug=False):
 def add(url, debug=False):
     response = add_document(doc_info=DocumentInfo(url=url), debug=debug)
     if response.status_code == 200:
-        secho(f"Already Exists.", fg="yellow")
+        secho("Already Exists.", fg="yellow")
     else:
-        secho(f"Added!", fg="bright_green")
+        secho("Added!", fg="bright_green")
 
 
 @click.command(help="Upload Reading List File")

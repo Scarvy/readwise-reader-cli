@@ -1,8 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import Any
-
 import csv
-from typing import List
+from abc import ABC, abstractmethod
+from typing import Any, List
 
 from bs4 import BeautifulSoup
 

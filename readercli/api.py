@@ -2,9 +2,9 @@
 import logging
 import os
 import time
-from functools import wraps
 from datetime import datetime
-from typing import List, Optional, Tuple, Dict, Union, Iterable
+from functools import wraps
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import dotenv
 import requests
@@ -19,7 +19,7 @@ from .constants import (
     LIST_ENDPOINT,
     TOKEN_URL,
 )
-from .models import DocumentInfo, ListParameters, CategoryEnum, LocationEnum
+from .models import CategoryEnum, DocumentInfo, ListParameters, LocationEnum
 
 urllib3.disable_warnings()
 dotenv.load_dotenv()
@@ -122,7 +122,7 @@ def _handle_http_status(
 
 def _fetch_results(
     params: Dict[str, Union[str, None]], retry_after_default: int = 5
-) -> Optional[Iterable[List[dict]]]:
+) -> Iterable[List[dict]]:
     next_page_cursor = None
     while True:
         params["pageCursor"] = next_page_cursor
@@ -157,7 +157,7 @@ def list_documents(
     location: Optional[LocationEnum] = None,
     updated_after: Optional[datetime] = None,
     debug: bool = False,
-) -> List[DocumentInfo]:
+) -> Optional[List[DocumentInfo]]:
     """Fetches a list of `DocumentInfo` objects.
 
     Args:
