@@ -58,7 +58,7 @@ Options:
                                   Updated after date in ISO format. Default:
                                   last 24hrs.
   -d, --date-range TEXT           View documents updated after choosen time:
-                                  day, week, month.
+                                  today, week, month.
   -L, --layout [table|list]       Display documents either as a list or table.
                                   Default: table.
   -n, --num-results INTEGER       The number of documents to show.
@@ -82,6 +82,10 @@ python -m readercli list --location archive --category article --update-after 20
 
 ```bash
 python -m readercli list --location archive --category article --update-after 2023-01-01 --layout list
+```
+
+```bash
+python -m readercli list --location archive --category article --date-range week
 ```
 
 ### Layouts
@@ -213,6 +217,17 @@ Usage: python -m readercli validate [OPTIONS] TOKEN
 Options:
   --help  Show this message and exit.
 ```
+
+## Main Third-Party Libraries
+
+- [click](https://github.com/pallets/click)
+- [pydantic](https://github.com/pydantic/pydantic)
+- [requests](https://github.com/psf/requests)
+- [rich](https://github.com/Textualize/rich)
+
+## Inspiration
+
+- [starcli](https://github.com/hedyhli/starcli)
 
 ## License
 
