@@ -1,6 +1,6 @@
 # Reader API Command-Line Interface
 
-![](./images/reader_app_icon.PNG)
+![](./images/reader-terminal.png)
 
 This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add` and `list` documents from your Reader library.
 
