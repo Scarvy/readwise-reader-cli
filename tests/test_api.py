@@ -1,90 +1,81 @@
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest import mock
 
-from readercli.api import validate_token, _get_list, _create_doc
-
-
-# source https://stackoverflow.com/questions/15753390/how-can-i-mock-requests-and-the-response
-def mock_request_get(**kwargs):
-    class MockGetResponse:
-        def __init__(self, status_code, count, next_page_cursor, results):
-            self.status_code = status_code
-            self.json = [
-                {"count": count, "nextPageCursor": next_page_cursor, "results": results}
-            ]
-
-        def status_code(self):
-            return self.status_code
-
-        def resutls(self):
-            return self.results
-
-    location = kwargs.get("location")
-
-    if location:
-        return MockGetResponse(
-            200, 2304, "01gm6kjzabcd609yepjrmcgz8a", {"key1": "value1"}
-        )
-
-    return MockGetResponse(200, 0, None, None)
+from readercli.api import _fetch_results  # list_documents,
+from readercli.api import (
+    _create_doc,
+    _get_list,
+    _handle_http_status,
+    add_document,
+    doc_info_jsonify,
+    list_parameter_jsonify,
+    validate_token,
+)
+from readercli.models import DocumentInfo
 
 
-@mock.patch("requests.get", side_effect=mock_request_get, autospec=True)
-def test_get_list(_):
-    _get_list(params={"location": "new"})
+def test_list_parameter_jsonify():
+    mock_params = Mock()
+    mock_params.model_dump.return_value = {"key": "value"}
+    assert list_parameter_jsonify(mock_params) == {"key": "value"}
 
 
-@mock.patch("requests.get", side_effect=mock_request_get, autospec=True)
-def test_get_list_empty(_):
-    _get_list(params={"location": None})
+def test_doc_info_jsonify():
+    mock_doc_info = Mock()
+    mock_doc_info.model_dump.return_value = {"key": "value"}
+    assert doc_info_jsonify(mock_doc_info) == {"key": "value"}
 
 
-def mock_request_post(**kwargs):
-    class MockPostResponse:
-        def __init__(self, json_data, status_code):
-            self.json = json_data
-            self.status_code = status_code
-
-        def json(self):
-            return self.json
-
-        def status_code(self):
-            return self.status_code
-
-    if kwargs["json"]["url"] == "https://new_article.com":
-        return MockPostResponse(
-            {"key1", "value1"},
-            201,
-        )
-
-    if kwargs["json"]["url"] == "https://already_exist_article.com":
-        return MockPostResponse(
-            {"key1", "value1"},
-            200,
-        )
-
-    if kwargs["json"]["url"] == "bad_article_url":
-        return MockPostResponse({"key1": "value1"}, 400)
-
-    return MockPostResponse(None, 400)
+@patch("readercli.api.requests.get")
+def test__get_list(mock_get):
+    mock_get.return_value = {"key1": "value1", "key2": [{"key1": "value1"}]}
+    assert _get_list({"key": "value"}) == {
+        "key1": "value1",
+        "key2": [{"key1": "value1"}],
+    }
 
 
-@mock.patch("requests.post", side_effect=mock_request_post, autospec=True)
-def test_create_new_document(_):
-    _create_doc(info={"url": "https://new_article.com"})
+@patch("readercli.api.requests.post")
+def test__create_doc(mock_post):
+    mock_post.return_value = {"key1": "value1"}
+    assert _create_doc({"key": "value"}) == {"key1": "value1"}
 
 
-@mock.patch("requests.post", side_effect=mock_request_post, autospec=True)
-def test_create_already_exist_document(_):
-    _create_doc(info={"url": "https://already_exist_article.com"})
+def test__handle_http_status():
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.headers.get.return_value = 5
+    assert _handle_http_status(mock_response) == ("valid", 5)
 
 
-@mock.patch("requests.post", side_effect=mock_request_post, autospec=True)
-def test_create_invalid_url_document(_):
-    _create_doc(info={"url": "bad_article_url"})
+@patch("readercli.api._get_list")
+@patch("readercli.api._handle_http_status")
+def test__fetch_results(mock_handle_status, mock_get_list):
+    mock_handle_status.return_value = ("valid", 5)
+    mock_get_list.return_value = Mock(
+        json=lambda: {"results": [], "nextPageCursor": None}
+    )
+    assert list(_fetch_results({"key": "value"})) == [[]]
 
 
-def test_validate_token_invalid():
-    token = "invalid_token"
-    result = validate_token(token)
-    assert result is False
+# @patch("readercli.api.list_documents")
+# def test_list_documents(mock_fetch_results):
+#     mock_fetch_results.return_value = [
+#         DocumentInfo(**{"url": "https://www.example.com"})
+#     ]
+#     assert list_documents() == [DocumentInfo(**{"url": "https://www.example.com"})]
+
+
+@patch("readercli.api._create_doc")
+@patch("readercli.api._handle_http_status")
+def test_add_document(mock_handle_status, mock_create_doc):
+    mock_handle_status.return_value = ("valid", 5)
+    mock_create_doc.return_value = "response"
+    assert add_document(Mock()) == "response"
+
+
+@patch("readercli.api.requests.get")
+def test_validate_token(mock_get):
+    mock_get.return_value = Mock(status_code=204)
+    assert validate_token("token") == True
