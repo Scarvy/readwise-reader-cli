@@ -12,7 +12,8 @@ from readercli.api import (
     list_parameter_jsonify,
     validate_token,
 )
-from readercli.models import DocumentInfo
+
+# from readercli.models import DocumentInfo
 
 
 def test_list_parameter_jsonify():
