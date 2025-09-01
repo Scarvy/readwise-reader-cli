@@ -340,7 +340,7 @@ wheels = [
 [[package]]
 name = "readwise-reader-cli"
 version = "0.0.1"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "click" },

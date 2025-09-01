@@ -10,10 +10,10 @@ Please note that future updates will include support for additional browsers.
 
 ## Installation
 
-Set up a virtual environment and then run:
+The easiest way to get started is with [`uv`](https://docs.astral.sh/uv/guides/tools/):
 
 ```bash
-pip install readwise-reader-cli
+uv tool install readwise-reader-cli
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ export READER_API_TOKEN={your_api_token}
 The CLI provides the following commands:
 
 ```bash
-Usage: python -m readercli [OPTIONS] COMMAND [ARGS]...
+Usage: uv run rw-cli [OPTIONS] COMMAND [ARGS]...
 
   Interact with your Reader Library
 
@@ -45,7 +45,7 @@ Commands:
 ### List Documents
 
 ```bash
-Usage: python -m readercli list [OPTIONS]
+Usage: uv run rw-cli list [OPTIONS]
 
   List Documents
 
@@ -69,23 +69,23 @@ Options:
 Examples:
 
 ```bash
-python -m readercli list --location archive
+rw-cli list --location archive
 ```
 
 ```bash
-python -m readercli list --location archive --category article
+rw-cli list --location archive --category article
 ```
 
 ```bash
-python -m readercli list --location archive --category article --update-after 2023-01-01
+rw-cli list --location archive --category article --update-after 2023-01-01
 ```
 
 ```bash
-python -m readercli list --location archive --category article --update-after 2023-01-01 --layout list
+rw-cli list --location archive --category article --update-after 2023-01-01 --layout list
 ```
 
 ```bash
-python -m readercli list --location archive --category article --date-range week
+rw-cli list --location archive --category article --date-range week
 ```
 
 ### Layouts
@@ -124,17 +124,17 @@ Options:
 Examples:
 
 ```bash
-python -m readercli upload /path/to/ReadingList.html
+rw-cli upload /path/to/ReadingList.html
 ```
 
 ```bash
-python -m readercli upload --file-type csv /path/to/ReadingList.csv
+rw-cli upload --file-type csv /path/to/ReadingList.csv
 ```
 
 ### Add Document
 
 ```bash
-Usage: python -m readercli add [OPTIONS] URL
+Usage: rw-cli add [OPTIONS] URL
 
   Add Document
 
@@ -145,13 +145,13 @@ Options:
 Example:
 
 ```bash
-python -m readercli add http://www.example.com
+rw-cli add http://www.example.com
 ```
 
 ### Library Overview
 
 ```bash
-Usage: python -m readercli lib [OPTIONS]
+Usage: rw-cli lib [OPTIONS]
 
   Library breakdown
 
@@ -160,8 +160,10 @@ Options:
   --help                          Show this message and exit.
 ```
 
+Check library counts:
+
 ```bash
-python -m readercli lib
+rw-cli lib
 
   Category Breakdown
 ┏━━━━━━━━━━━━━┳━━━━━━━┓
@@ -169,7 +171,7 @@ python -m readercli lib
 ┡━━━━━━━━━━━━━╇━━━━━━━┩
 │ 🖍️ highlight│   724 │
 │ 📡️ rss      │   391 │
-│ ✉️ email     │   363 │
+│ ✉️ email    │   363 │
 │ 📰️ article  │   264 │
 │ 📝️ note     │   140 │
 │ 📄️ pdf      │    83 │
@@ -190,7 +192,7 @@ python -m readercli lib --view [location | tags]
 │ 📥️ feed   │     2 │
 └───────────┴───────┘
 
-python -m readercli lib --view tags
+rw-cli lib --view tags
 
 Tags Breakdown
 ┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┓
@@ -210,7 +212,7 @@ Tags Breakdown
 ### Validate Token
 
 ```bash
-Usage: python -m readercli validate [OPTIONS] TOKEN
+Usage: rw-cli validate [OPTIONS] TOKEN
 
   Validate token
 
