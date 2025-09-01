@@ -12,17 +12,25 @@ Please note that future updates will include support for additional browsers.
 
 The easiest way to get started is with [`uv`](https://docs.astral.sh/uv/guides/tools/):
 
-```bash
-uv tool install readwise-reader-cli
-```
+    uv tool install git+https://github.com/Scarvy/readwise-reader-cli
+
+Then run:
+
+    rw-cli --help
+
+Alternatively, can run:
+
+    uvx --from 'git+https://github.com/Scarvy/readwise-reader-cli' rw-cli --help
+
+This will invoke the tool without installing it.
 
 ## Usage
 
 Before using the CLI, make sure to set the READER_API_TOKEN environment variable. You can obtain your API token [here](https://readwise.io/access_token).
 
-```bash
-export READER_API_TOKEN={your_api_token}
-```
+
+    export READER_API_TOKEN={your_api_token}
+
 
 The CLI provides the following commands:
 
@@ -68,25 +76,26 @@ Options:
 
 Examples:
 
-```bash
-rw-cli list --location archive
-```
+See all documents located in archive:
 
-```bash
-rw-cli list --location archive --category article
-```
+    rw-cli list --location archive
 
-```bash
-rw-cli list --location archive --category article --update-after 2023-01-01
-```
+See all articles located in archive:
 
-```bash
-rw-cli list --location archive --category article --update-after 2023-01-01 --layout list
-```
+    rw-cli list --location archive --category article
 
-```bash
-rw-cli list --location archive --category article --date-range week
-```
+See all articles located in archive after Jan 1st, 2023
+
+    rw-cli list --location archive --category article --update-after 2023-01-01
+
+Same as above, but in a list format
+
+    rw-cli list --location archive --category article --update-after 2023-01-01 --layout list
+
+Can provide a date range like 'week' or 'month'
+
+    rw-cli list --location archive --category article --date-range week
+
 
 ### Layouts
 
