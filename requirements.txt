@@ -1,7 +1,0 @@
-rich
-click
-requests
-beautifulsoup4
-python-dotenv
-xdg-base-dirs
-python-dateutil
