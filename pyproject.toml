@@ -38,12 +38,9 @@ test = [
     "ruff",
 ]
 
-[uv.tool.scripts]
-rw = "src/readercli.__main__:cli"
+[project.scripts]
+rw-cli = "readwise_reader_cli.__main__:cli"
 
 [build-system]
 requires = ["uv_build>=0.8.14,<0.9.0"]
 build-backend = "uv_build"
-
-[tool.uv]
-package = false
