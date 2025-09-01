@@ -1,4 +1,5 @@
 """Subcommands of the main CLI module"""
+
 import json
 import os
 from datetime import datetime, timedelta
