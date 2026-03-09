@@ -8,7 +8,7 @@ import click
 from click import secho
 from xdg_base_dirs import xdg_data_home
 
-from .api import add_document, list_documents, validate_token
+from .api import add_document, list_documents, update_document, validate_token
 from .constants import VALID_CATEGORY_OPTIONS, VALID_LOCATION_OPTIONS
 from .data import fetch_full_library
 from .layout import print_results, print_view_results
@@ -178,13 +178,44 @@ def lib(view, debug=False):
 
 @click.command(help="Add Document")
 @click.argument("url")
+@click.option("--tag", "-t", multiple=True, help="Tag(s) to add to the document. Can be used multiple times.")
 @click.option("--debug", is_flag=True, default=False, hidden=True)
-def add(url, debug=False):
-    response = add_document(doc_info=DocumentInfo(url=url), debug=debug)
+def add(url, tag, debug=False):
+    tags = [t for t in tag] if tag else None
+    response = add_document(doc_info=DocumentInfo(url=url, tags=tags), debug=debug)
     if response.status_code == 200:
         secho("Already Exists.", fg="yellow")
     else:
         secho("Added!", fg="bright_green")
+
+
+@click.command(help="Update Document")
+@click.argument("document_id")
+@click.option("--tag", "-t", multiple=True, help="Tag(s) to set on the document. Can be used multiple times.")
+@click.option(
+    "--location",
+    "-l",
+    type=click.Choice(tuple(VALID_LOCATION_OPTIONS), case_sensitive=True),
+    help="Move document to location",
+)
+@click.option("--title", "-T", type=str, help="Update document title")
+@click.option("--debug", is_flag=True, default=False, hidden=True)
+def update(document_id, tag, location, title, debug=False):
+    data = {}
+    if tag:
+        data["tags"] = [t for t in tag]
+    if location:
+        data["location"] = location
+    if title:
+        data["title"] = title
+
+    if not data:
+        secho("No update options provided. Use --help to see available options.", fg="yellow")
+        return
+
+    response = update_document(document_id=document_id, data=data, debug=debug)
+    if response.status_code in (200, 201):
+        secho("Updated!", fg="bright_green")
 
 
 @click.command(help="Upload Reading List File")
