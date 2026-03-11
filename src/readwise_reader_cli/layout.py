@@ -22,6 +22,7 @@ emoji_mapping_category = {
     "epub": ":book-emoji: epub",
     "tweet": ":bird-emoji: tweet",
     "video": ":video_camera-emoji: video",
+    "podcast": ":headphones-emoji: podcast",
 }
 
 emoji_mapping_location = {
@@ -44,7 +45,7 @@ def format_reading_progress(reading_progress: float) -> str:
     return percentage_str
 
 
-def format_published_date(timestamp_miliseconds: Union[float, str]) -> str:
+def format_published_date(timestamp_miliseconds: Union[float, str]) -> str | None:
     """Format published date of a document"""
 
     if isinstance(timestamp_miliseconds, float):
