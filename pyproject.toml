@@ -1,6 +1,6 @@
 [project]
 name = "readwise-reader-cli"
-version = "0.0.1"
+version = "0.0.2"
 description = "Engage with your Readwise Reader library through your command-line."
 authors = [{ name = "Scott Carvalho", email = "scottcarvalho71@gmail.com" }]
 requires-python = ">=3.10"
