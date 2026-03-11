@@ -2,7 +2,7 @@
 
 ![](./images/reader-terminal.png)
 
-This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add` and `list` documents from your Reader library.
+This repository provides a command-line interface (CLI) for interacting with [Readwise's Reader API](https://readwise.io/reader_api). This tool allows you to interact with the API directly from your command line, making it easy to `add`, `list`, and `update` documents from your Reader library.
 
 Also, you can `upload` documents from your browser reading list, such as Chrome ReadingList.
 
@@ -46,6 +46,7 @@ Commands:
   add       Add Document
   lib       Library breakdown
   list      List Documents
+  update    Update Document
   upload    Upload Reading List File
   validate  Validate token
 ```
@@ -148,14 +149,59 @@ Usage: rw-cli add [OPTIONS] URL
   Add Document
 
 Options:
-  --help  Show this message and exit.
+  -t, --tag TEXT  Tag(s) to add to the document. Can be used multiple times.
+  --help          Show this message and exit.
 ```
 
-Example:
+Examples:
 
 ```bash
 rw-cli add http://www.example.com
 ```
+
+Add a document with tags:
+
+```bash
+rw-cli add http://www.example.com -t python -t tutorial
+```
+
+### Update Document
+
+```bash
+Usage: rw-cli update [OPTIONS] DOCUMENT_ID
+
+  Update Document
+
+Options:
+  -t, --tag TEXT                  Tag(s) to set on the document. Can be used
+                                  multiple times.
+  -l, --location [new|archive|later|feed]
+                                  Move document to location
+  -T, --title TEXT                Update document title
+  --help                          Show this message and exit.
+```
+
+Examples:
+
+Add tags to an existing document:
+
+```bash
+rw-cli update 01abc123 -t ai -t learning
+```
+
+Move a document to archive:
+
+```bash
+rw-cli update 01abc123 --location archive
+```
+
+Update a document's title:
+
+```bash
+rw-cli update 01abc123 --title "New Title"
+```
+
+You can find document IDs from the API response when adding documents, or by inspecting results from `rw-cli list`.
 
 ### Library Overview
 

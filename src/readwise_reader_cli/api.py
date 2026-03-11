@@ -18,6 +18,7 @@ from .constants import (
     CREATE_ENDPOINT,
     LIST_ENDPOINT,
     TOKEN_URL,
+    UPDATE_ENDPOINT,
 )
 from .models import CategoryEnum, DocumentInfo, ListParameters, LocationEnum
 
@@ -112,6 +113,15 @@ def _create_doc(info: Dict[str, Union[str, None]]) -> Response:
     return resp
 
 
+def _update_doc(document_id: str, data: Dict[str, Union[str, None]]) -> Response:
+    resp = requests.patch(
+        url=f"{BASE_URL}{UPDATE_ENDPOINT}/{document_id}/",
+        headers={"Authorization": f"Token {os.getenv('READER_API_TOKEN')}"},
+        json=data,
+    )
+    return resp
+
+
 def _handle_http_status(
     resp: Response, retry_after_default: int = 5
 ) -> Tuple[str, int]:
@@ -199,6 +209,36 @@ def add_document(doc_info: DocumentInfo, debug: bool = False) -> Response:
 
     while True:
         resp = _create_doc(info=doc_info_json)
+
+        handling_code, retry_after = _handle_http_status(resp=resp)
+
+        if not handling_code == "valid":
+            if handling_code == "retry":
+                time.sleep(retry_after)
+                msg = STATUS_ACTIONS[handling_code]
+                secho(msg.format(retry_after), fg="bright_yellow")
+            else:
+                msg = STATUS_ACTIONS[handling_code]
+                secho(msg, fg="bright_red")
+                break
+        else:
+            break
+    return resp
+
+
+@log
+def update_document(
+    document_id: str, data: Dict[str, Union[str, None]], debug: bool = False
+) -> Response:
+    """Updates a document in a users Reader account.
+
+    Args:
+        document_id (str): The document's unique identifier
+        data (dict): Fields to update
+    """
+
+    while True:
+        resp = _update_doc(document_id=document_id, data=data)
 
         handling_code, retry_after = _handle_http_status(resp=resp)
 
