@@ -61,7 +61,7 @@ Usage: uv run rw-cli list [OPTIONS]
 Options:
   -l, --location [new|archive|later|feed]
                                   Document(s) location
-  -c, --category [article|tweet|pdf|epub|email|note|video|highlight|rss]
+  -c, --category [article|tweet|pdf|epub|email|note|video|podcast|highlight|rss]
                                   Document(s) category
   -a, --update-after [%Y-%m-%d|%Y-%m-%dT%H:%M:%S|%Y-%m-%d %H:%M:%S]
                                   Updated after date in ISO format. Default:
@@ -228,6 +228,7 @@ rw-cli lib
 │ 📡️ rss      │   391 │
 │ ✉️ email    │   363 │
 │ 📰️ article  │   264 │
+| 🎧 podcast  |   150 |
 │ 📝️ note     │   140 │
 │ 📄️ pdf      │    83 │
 │ 🐦️ tweet    │    25 │
