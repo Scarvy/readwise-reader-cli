@@ -9,6 +9,7 @@ VALID_CATEGORY_OPTIONS = {
     "epub",
     "tweet",
     "video",
+    "podcast",
 }
 
 TOKEN_URL = "https://readwise.io/access_token"
