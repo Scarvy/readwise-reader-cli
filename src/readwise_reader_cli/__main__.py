@@ -1,4 +1,5 @@
 """The main CLI module of readercli"""
+
 import click
 
 from . import commands

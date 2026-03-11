@@ -1,4 +1,5 @@
 """Provides code to fetch and manage document information."""
+
 import logging
 import os
 import time

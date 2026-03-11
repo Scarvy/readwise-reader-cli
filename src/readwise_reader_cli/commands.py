@@ -178,7 +178,12 @@ def lib(view, debug=False):
 
 @click.command(help="Add Document")
 @click.argument("url")
-@click.option("--tag", "-t", multiple=True, help="Tag(s) to add to the document. Can be used multiple times.")
+@click.option(
+    "--tag",
+    "-t",
+    multiple=True,
+    help="Tag(s) to add to the document. Can be used multiple times.",
+)
 @click.option("--debug", is_flag=True, default=False, hidden=True)
 def add(url, tag, debug=False):
     tags = [t for t in tag] if tag else None
@@ -191,7 +196,12 @@ def add(url, tag, debug=False):
 
 @click.command(help="Update Document")
 @click.argument("document_id")
-@click.option("--tag", "-t", multiple=True, help="Tag(s) to set on the document. Can be used multiple times.")
+@click.option(
+    "--tag",
+    "-t",
+    multiple=True,
+    help="Tag(s) to set on the document. Can be used multiple times.",
+)
 @click.option(
     "--location",
     "-l",
@@ -210,7 +220,10 @@ def update(document_id, tag, location, title, debug=False):
         data["title"] = title
 
     if not data:
-        secho("No update options provided. Use --help to see available options.", fg="yellow")
+        secho(
+            "No update options provided. Use --help to see available options.",
+            fg="yellow",
+        )
         return
 
     response = update_document(document_id=document_id, data=data, debug=debug)
