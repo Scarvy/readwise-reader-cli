@@ -2,7 +2,7 @@
 
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import click
 from click import secho
@@ -45,9 +45,9 @@ CACHE_EXPIRATION = 1  # Minutes
 @click.option(
     "--update-after",
     "-a",
-    default=(datetime.now() - timedelta(days=1)),
+    default=None,
     type=click.DateTime(),
-    help="Updated after date in ISO format. Default: last 24hrs.",
+    help="Updated after date in ISO format. Default: no filter.",
 )
 @click.option(
     "--date-range",
@@ -89,7 +89,7 @@ def list(
     if date_range:
         update_after = convert_date_range(date_range=date_range)
 
-    update_after_str = update_after.strftime("%Y-%m-%d")
+    update_after_str = update_after.strftime("%Y-%m-%d") if update_after else "all"
 
     options_key = f"{location}_{(DEFAULT_CATEGORY_NAME if not category else category)}_{update_after_str}"
 
