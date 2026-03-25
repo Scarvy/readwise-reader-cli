@@ -10,6 +10,7 @@ VALID_CATEGORY_OPTIONS = {
     "tweet",
     "video",
     "podcast",
+    "audiobook",
 }
 
 TOKEN_URL = "https://readwise.io/access_token"

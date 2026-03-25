@@ -23,6 +23,7 @@ emoji_mapping_category = {
     "tweet": ":bird-emoji: tweet",
     "video": ":video_camera-emoji: video",
     "podcast": ":headphones-emoji: podcast",
+    "audiobook": ":headphones-emoji: audiobook",
 }
 
 emoji_mapping_location = {

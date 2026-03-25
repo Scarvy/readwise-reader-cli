@@ -31,6 +31,7 @@ class CategoryEnum(str, Enum):
     tweet = "tweet"
     video = "video"
     podcast = "podcast"
+    audiobook = "audiobook"
 
 
 class TagInfo(BaseModel):
