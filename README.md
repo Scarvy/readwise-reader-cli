@@ -1,4 +1,8 @@
-# Reader API Command-Line Interface
+# Reader API Command-Line Interface (Deprecated)
+
+> [!WARNING]
+> **Deprecated as of March 25, 2025.** Readwise has released an [official CLI](https://github.com/readwiseio/readwise-cli) that covers the features of this project and much more. I'd recommend using that instead. If you'd like to build on this project's approach, feel free to fork the repo.
+
 
 <p align='center'>
   <img src="./images/reader-terminal.png">
